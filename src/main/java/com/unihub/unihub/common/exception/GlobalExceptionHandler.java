@@ -43,6 +43,33 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理用户名不存在异常
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<String> handleUserNotFoundException(UserNotFoundException ex) {
+        return ApiResponse.error(400, ex.getMessage());
+    }
+
+    /**
+     * 处理密码错误异常
+     */
+    @ExceptionHandler(PasswordIncorrectException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<String> handlePasswordIncorrectException(PasswordIncorrectException ex) {
+        return ApiResponse.error(400, ex.getMessage());
+    }
+
+    /**
+     * 处理账户状态异常
+     */
+    @ExceptionHandler(UserStatusException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiResponse<String> handleUserStatusException(UserStatusException ex) {
+        return ApiResponse.error(403, ex.getMessage());
+    }
+
+    /**
      * 处理运行时异常
      */
     @ExceptionHandler(RuntimeException.class)

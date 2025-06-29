@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.unihub.unihub.common.exception.UserNotFoundException;
+import com.unihub.unihub.common.exception.PasswordIncorrectException;
+import com.unihub.unihub.common.exception.UserStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -73,16 +76,16 @@ public class UserServiceImpl implements UserService {
     public String login(UserLoginDto loginDto) {
         Optional<User> userOpt = userRepository.findByUsername(loginDto.getUsername());
         if (userOpt.isEmpty()) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new UserNotFoundException("用户名不存在");
         }
 
         User user = userOpt.get();
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new PasswordIncorrectException("密码错误，请重试");
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("账户状态异常，请联系管理员");
+            throw new UserStatusException("账户状态异常，请联系管理员");
         }
 
         // 更新最后登录时间

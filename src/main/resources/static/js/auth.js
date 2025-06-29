@@ -185,18 +185,17 @@ createApp({
 
                 const data = await response.json();
 
-                if (response.ok) {
+                if (response.ok && data.data) {
                     this.showMessage('success', '登录成功！正在跳转...');
-                    
                     // 保存用户信息和token到localStorage
                     localStorage.setItem('user', JSON.stringify(data.data.user));
                     localStorage.setItem('token', data.data.token || '');
-                    
                     // 延迟跳转到主页
                     setTimeout(() => {
                         window.location.href = '/dashboard';
                     }, 1500);
                 } else {
+                    // 登录失败时只显示错误信息，不访问data.data
                     this.showMessage('error', data.message || '登录失败，请检查用户名和密码');
                 }
             } catch (error) {
