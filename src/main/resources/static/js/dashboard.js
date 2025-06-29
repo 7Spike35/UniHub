@@ -144,12 +144,25 @@ createApp({
             this.saving = true;
             try {
                 const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('未找到认证令牌，请重新登录');
+                }
+
+                // 确保token是字符串且不包含非法字符
+                const cleanToken = String(token).trim();
+                // 对token进行Base64编码，确保只包含安全字符
+                const encodedToken = btoa(encodeURIComponent(cleanToken).replace(/%([0-9A-F]{2})/g, 
+                    (match, p1) => String.fromCharCode(parseInt(p1, 16))));
+                
+                // 创建请求头
+                const headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+                // 使用编码后的token
+                headers.append('Authorization', `Basic ${encodedToken}`);
+
                 const response = await fetch(`/api/users/${this.user.id}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         realName: this.profileForm.realName,
                         studentId: this.profileForm.studentId,
@@ -175,7 +188,11 @@ createApp({
                 }
             } catch (error) {
                 console.error('保存个人资料失败:', error);
-                this.showMessage('error', '网络错误，请稍后重试');
+                const errorMessage = error.message || '网络错误，请稍后重试';
+                if (error.message && error.message.includes('未找到认证令牌')) {
+                    this.redirectToLogin();
+                }
+                this.showMessage('error', errorMessage);
             } finally {
                 this.saving = false;
             }
@@ -289,8 +306,66 @@ createApp({
 
         // 显示消息
         showMessage(type, text) {
-            // 这里可以集成一个消息提示组件
-            alert(`${type === 'success' ? '成功' : '错误'}: ${text}`);
+            // 创建消息容器（如果不存在）
+            let messageContainer = document.getElementById('message-container');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'message-container';
+                messageContainer.style.position = 'fixed';
+                messageContainer.style.top = '20px';
+                messageContainer.style.right = '20px';
+                messageContainer.style.zIndex = '9999';
+                document.body.appendChild(messageContainer);
+            }
+
+            // 创建消息元素
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.style.padding = '12px 24px';
+            message.style.marginBottom = '10px';
+            message.style.borderRadius = '4px';
+            message.style.color = 'white';
+            message.style.fontSize = '14px';
+            message.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            message.style.transition = 'all 0.3s ease';
+            message.style.opacity = '0';
+            message.style.transform = 'translateX(100%)';
+            message.style.maxWidth = '320px';
+            message.style.wordBreak = 'break-word';
+            
+            // 设置不同消息类型的样式
+            if (type === 'success') {
+                message.style.backgroundColor = '#10b981'; // 绿色
+            } else {
+                message.style.backgroundColor = '#ef4444'; // 红色
+            }
+
+            // 设置消息内容
+            message.textContent = text;
+            
+            // 添加到容器
+            messageContainer.appendChild(message);
+            
+            // 触发动画
+            setTimeout(() => {
+                message.style.opacity = '1';
+                message.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translateX(100%)';
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    message.remove();
+                    // 如果容器为空，也移除容器
+                    if (messageContainer.children.length === 0) {
+                        messageContainer.remove();
+                    }
+                }, 300);
+            }, 3000);
         },
 
         // 退出登录

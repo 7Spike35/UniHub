@@ -113,41 +113,85 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserVo updateUser(Long userId, UserUpdateDto updateDto) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("用户不存在");
-        }
+        try {
+            // 记录传入的用户ID和更新数据
+            System.out.println("开始更新用户信息, 用户ID: " + userId);
+            System.out.println("更新数据: " + updateDto);
 
-        User user = userOpt.get();
-        
-        // 更新非空字段
-        if (updateDto.getRealName() != null) {
-            user.setRealName(updateDto.getRealName());
-        }
-        if (updateDto.getPhoneNumber() != null) {
-            user.setPhoneNumber(updateDto.getPhoneNumber());
-        }
-        if (updateDto.getAvatarUrl() != null) {
-            user.setAvatarUrl(updateDto.getAvatarUrl());
-        }
-        if (updateDto.getUniversity() != null) {
-            user.setUniversity(updateDto.getUniversity());
-        }
-        if (updateDto.getMajor() != null) {
-            user.setMajor(updateDto.getMajor());
-        }
-        if (updateDto.getGrade() != null) {
-            user.setGrade(updateDto.getGrade());
-        }
-        if (updateDto.getRole() != null) {
-            user.setRole(updateDto.getRole());
-        }
-        if (updateDto.getStatus() != null) {
-            user.setStatus(updateDto.getStatus());
-        }
+            // 验证用户ID
+            if (userId == null) {
+                throw new RuntimeException("用户ID不能为空");
+            }
+            
+            // 查找用户
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                String errorMsg = "用户不存在, ID: " + userId;
+                System.err.println(errorMsg);
+                throw new RuntimeException(errorMsg);
+            }
 
-        User savedUser = userRepository.save(user);
-        return convertToVo(savedUser);
+            User user = userOpt.get();
+            System.out.println("找到用户: " + user.getUsername() + " (ID: " + user.getId() + ")");
+            
+            // 记录更新前的用户信息
+            System.out.println("更新前的用户信息: " + user);
+            
+            // 更新非空字段
+            if (updateDto.getUsername() != null) {
+                System.out.println("更新用户名: " + updateDto.getUsername());
+                user.setUsername(updateDto.getUsername());
+            }
+            if (updateDto.getEmail() != null) {
+                System.out.println("更新邮箱: " + updateDto.getEmail());
+                user.setEmail(updateDto.getEmail());
+            }
+            if (updateDto.getRealName() != null) {
+                System.out.println("更新真实姓名: " + updateDto.getRealName());
+                user.setRealName(updateDto.getRealName());
+            }
+            if (updateDto.getPhoneNumber() != null) {
+                System.out.println("更新手机号: " + updateDto.getPhoneNumber());
+                user.setPhoneNumber(updateDto.getPhoneNumber());
+            }
+            if (updateDto.getStudentId() != null) {
+                System.out.println("更新学号: " + updateDto.getStudentId());
+                user.setStudentId(updateDto.getStudentId());
+            }
+            if (updateDto.getAvatarUrl() != null) {
+                System.out.println("更新头像URL: " + updateDto.getAvatarUrl());
+                user.setAvatarUrl(updateDto.getAvatarUrl());
+            }
+            if (updateDto.getUniversity() != null) {
+                System.out.println("更新大学: " + updateDto.getUniversity());
+                user.setUniversity(updateDto.getUniversity());
+            }
+            if (updateDto.getMajor() != null) {
+                System.out.println("更新专业: " + updateDto.getMajor());
+                user.setMajor(updateDto.getMajor());
+            }
+            if (updateDto.getGrade() != null) {
+                System.out.println("更新年级: " + updateDto.getGrade());
+                user.setGrade(updateDto.getGrade());
+            }
+            if (updateDto.getRole() != null) {
+                System.out.println("更新角色: " + updateDto.getRole());
+                user.setRole(updateDto.getRole());
+            }
+            if (updateDto.getStatus() != null) {
+                System.out.println("更新状态: " + updateDto.getStatus());
+                user.setStatus(updateDto.getStatus());
+            }
+
+            // 保存更新后的用户信息
+            User savedUser = userRepository.save(user);
+            System.out.println("用户信息更新成功: " + savedUser);
+            return convertToVo(savedUser);
+        } catch (Exception e) {
+            System.err.println("更新用户信息时发生错误: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("更新用户信息失败: " + e.getMessage(), e);
+        }
     }
 
     @Override
