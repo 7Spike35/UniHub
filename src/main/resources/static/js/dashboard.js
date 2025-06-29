@@ -54,7 +54,7 @@ createApp({
         switchPage(page) {
             this.activePage = page;
             this.showUserMenu = false;
-            
+
             // 如果切换到用户管理页面，加载用户数据
             if (page === 'user-management') {
                 this.loadUsers();
@@ -93,7 +93,7 @@ createApp({
             try {
                 const token = localStorage.getItem('token');
                 const user = localStorage.getItem('user');
-                
+
                 if (!token || !user) {
                     this.redirectToLogin();
                     return;
@@ -151,9 +151,9 @@ createApp({
                 // 确保token是字符串且不包含非法字符
                 const cleanToken = String(token).trim();
                 // 对token进行Base64编码，确保只包含安全字符
-                const encodedToken = btoa(encodeURIComponent(cleanToken).replace(/%([0-9A-F]{2})/g, 
+                const encodedToken = btoa(encodeURIComponent(cleanToken).replace(/%([0-9A-F]{2})/g,
                     (match, p1) => String.fromCharCode(parseInt(p1, 16))));
-                
+
                 // 创建请求头
                 const headers = new Headers();
                 headers.append('Content-Type', 'application/json');
@@ -332,7 +332,7 @@ createApp({
             message.style.transform = 'translateX(100%)';
             message.style.maxWidth = '320px';
             message.style.wordBreak = 'break-word';
-            
+
             // 设置不同消息类型的样式
             if (type === 'success') {
                 message.style.backgroundColor = '#10b981'; // 绿色
@@ -342,21 +342,21 @@ createApp({
 
             // 设置消息内容
             message.textContent = text;
-            
+
             // 添加到容器
             messageContainer.appendChild(message);
-            
+
             // 触发动画
             setTimeout(() => {
                 message.style.opacity = '1';
                 message.style.transform = 'translateX(0)';
             }, 10);
-            
+
             // 3秒后自动消失
             setTimeout(() => {
                 message.style.opacity = '0';
                 message.style.transform = 'translateX(100%)';
-                
+
                 // 动画结束后移除元素
                 setTimeout(() => {
                     message.remove();
@@ -404,23 +404,23 @@ createApp({
 
         filterUsers() {
             let filtered = this.allUsers;
-            
+
             // 按状态筛选
             if (this.statusFilter !== 'ALL') {
                 filtered = filtered.filter(user => user.status === this.statusFilter);
             }
-            
+
             // 按关键词搜索
             if (this.searchKeyword.trim()) {
                 const keyword = this.searchKeyword.toLowerCase();
-                filtered = filtered.filter(user => 
+                filtered = filtered.filter(user =>
                     user.username.toLowerCase().includes(keyword) ||
                     user.realName.toLowerCase().includes(keyword) ||
                     user.email.toLowerCase().includes(keyword) ||
                     user.studentId.toLowerCase().includes(keyword)
                 );
             }
-            
+
             this.filteredUsers = filtered;
         },
 
@@ -441,13 +441,13 @@ createApp({
         async toggleUserStatus(user) {
             const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
             const statusText = newStatus === 'ACTIVE' ? '启用' : '禁用';
-            
+
             if (confirm(`确定要${statusText}用户 "${user.realName}" 吗？`)) {
                 try {
                     const response = await fetch(`/api/users/${user.id}/status?status=${newStatus}`, {
                         method: 'PUT'
                     });
-                    
+
                     if (response.ok) {
                         user.status = newStatus;
                         this.showMessage('success', `用户${statusText}成功`);
@@ -467,7 +467,7 @@ createApp({
                     const response = await fetch(`/api/users/${user.id}`, {
                         method: 'DELETE'
                     });
-                    
+
                     if (response.ok) {
                         this.allUsers = this.allUsers.filter(u => u.id !== user.id);
                         this.filterUsers();
