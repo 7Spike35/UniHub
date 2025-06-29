@@ -1,5 +1,7 @@
 package com.unihub.unihub.user.dto;
 
+import com.unihub.unihub.user.entity.UserRole;
+import com.unihub.unihub.user.entity.UserStatus;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,4 +29,8 @@ public class UserUpdateDto {
 
     @Size(max = 20, message = "年级长度不能超过20个字符")
     private String grade;
+    
+    private UserRole role;
+    
+    private UserStatus status;
 } 

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniHub - 登录/注册</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="auth-app">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- 切换按钮 -->
+                <div class="auth-tabs">
+                    <button 
+                        class="auth-tab" 
+                        :class="{ active: activeTab === 'login' }"
+                        @click="switchTab('login')"
+                    >
+                        <i class="fas fa-sign-in-alt"></i> 登录
+                    </button>
+                    <button 
+                        class="auth-tab" 
+                        :class="{ active: activeTab === 'register' }"
+                        @click="switchTab('register')"
+                    >
+                        <i class="fas fa-user-plus"></i> 注册
+                    </button>
+                </div>
+
+                <!-- 消息提示 -->
+                <div v-if="message.show" class="alert" :class="'alert-' + message.type">
+                    <i :class="message.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                    {{ message.text }}
+                </div>
+
+                <!-- 登录表单 -->
+                <div v-if="activeTab === 'login'" class="auth-form">
+                    <h2><i class="fas fa-user-circle"></i> 欢迎回来</h2>
+                    <p class="auth-subtitle">请登录您的UniHub账户</p>
+                    
+                    <form @submit.prevent="login">
+                        <div class="form-group">
+                            <label for="login-username">用户名</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input 
+                                    type="text" 
+                                    id="login-username"
+                                    class="form-control" 
+                                    v-model="loginForm.username"
+                                    :class="{ 'error': formErrors.username }"
+                                    placeholder="请输入用户名"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.username" class="error-text">{{ formErrors.username }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">密码</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input 
+                                    type="password" 
+                                    id="login-password"
+                                    class="form-control" 
+                                    v-model="loginForm.password"
+                                    :class="{ 'error': formErrors.password }"
+                                    placeholder="请输入密码"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.password" class="error-text">{{ formErrors.password }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="loginForm.rememberMe">
+                                <span class="checkmark"></span>
+                                记住我
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+                            <i v-if="loading" class="fas fa-spinner fa-spin"></i>
+                            <i v-else class="fas fa-sign-in-alt"></i>
+                            {{ loading ? '登录中...' : '登录' }}
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 注册表单 -->
+                <div v-if="activeTab === 'register'" class="auth-form">
+                    <h2><i class="fas fa-user-plus"></i> 创建账户</h2>
+                    <p class="auth-subtitle">加入UniHub，开启您的学习之旅</p>
+                    
+                    <form @submit.prevent="register">
+                        <div class="form-group">
+                            <label for="register-username">用户名 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-username"
+                                    class="form-control" 
+                                    v-model="registerForm.username"
+                                    :class="{ 'error': formErrors.username }"
+                                    placeholder="请输入用户名"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.username" class="error-text">{{ formErrors.username }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-email">邮箱 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-envelope"></i>
+                                <input 
+                                    type="email" 
+                                    id="register-email"
+                                    class="form-control" 
+                                    v-model="registerForm.email"
+                                    :class="{ 'error': formErrors.email }"
+                                    placeholder="请输入邮箱地址"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.email" class="error-text">{{ formErrors.email }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-realName">真实姓名 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-id-card"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-realName"
+                                    class="form-control" 
+                                    v-model="registerForm.realName"
+                                    :class="{ 'error': formErrors.realName }"
+                                    placeholder="请输入真实姓名"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.realName" class="error-text">{{ formErrors.realName }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-studentId">学号 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-graduation-cap"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-studentId"
+                                    class="form-control" 
+                                    v-model="registerForm.studentId"
+                                    :class="{ 'error': formErrors.studentId }"
+                                    placeholder="请输入学号"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.studentId" class="error-text">{{ formErrors.studentId }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-phoneNumber">手机号 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-phone"></i>
+                                <input 
+                                    type="tel" 
+                                    id="register-phoneNumber"
+                                    class="form-control" 
+                                    v-model="registerForm.phoneNumber"
+                                    :class="{ 'error': formErrors.phoneNumber }"
+                                    placeholder="请输入手机号"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.phoneNumber" class="error-text">{{ formErrors.phoneNumber }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-university">大学 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-university"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-university"
+                                    class="form-control" 
+                                    v-model="registerForm.university"
+                                    :class="{ 'error': formErrors.university }"
+                                    placeholder="请输入大学名称"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.university" class="error-text">{{ formErrors.university }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-major">专业 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-book"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-major"
+                                    class="form-control" 
+                                    v-model="registerForm.major"
+                                    :class="{ 'error': formErrors.major }"
+                                    placeholder="请输入专业名称"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.major" class="error-text">{{ formErrors.major }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-grade">年级 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-calendar"></i>
+                                <input 
+                                    type="text" 
+                                    id="register-grade"
+                                    class="form-control" 
+                                    v-model="registerForm.grade"
+                                    :class="{ 'error': formErrors.grade }"
+                                    placeholder="请输入年级"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.grade" class="error-text">{{ formErrors.grade }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-role">角色 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-user-tag"></i>
+                                <select id="register-role" class="form-control" v-model="registerForm.role" required>
+                                    <option value="STUDENT">学生</option>
+                                    <option value="TEACHER">教师</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-password">密码 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input 
+                                    type="password" 
+                                    id="register-password"
+                                    class="form-control" 
+                                    v-model="registerForm.password"
+                                    :class="{ 'error': formErrors.password }"
+                                    placeholder="请输入密码"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.password" class="error-text">{{ formErrors.password }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-confirmPassword">确认密码 *</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input 
+                                    type="password" 
+                                    id="register-confirmPassword"
+                                    class="form-control" 
+                                    v-model="registerForm.confirmPassword"
+                                    :class="{ 'error': formErrors.confirmPassword }"
+                                    placeholder="请再次输入密码"
+                                    required
+                                >
+                            </div>
+                            <span v-if="formErrors.confirmPassword" class="error-text">{{ formErrors.confirmPassword }}</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+                            <i v-if="loading" class="fas fa-spinner fa-spin"></i>
+                            <i v-else class="fas fa-user-plus"></i>
+                            {{ loading ? '注册中...' : '注册' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载 JavaScript 文件 -->
+    <script src="/js/auth.js"></script>
+</body>
+</html> 

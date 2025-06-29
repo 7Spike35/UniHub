@@ -30,13 +30,6 @@
                     >
                         <i class="fas fa-list"></i> 用户列表
                     </button>
-                    <button 
-                        class="tab" 
-                        :class="{ active: activeTab === 'add' }"
-                        @click="switchTab('add')"
-                    >
-                        <i class="fas fa-plus"></i> 添加用户
-                    </button>
                 </div>
 
                 <!-- 消息提示 -->
@@ -128,92 +121,6 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- 添加用户标签页 -->
-                <div v-if="activeTab === 'add'">
-                    <div class="form-container">
-                        <h3><i class="fas fa-user-plus"></i> 添加新用户</h3>
-                        <form @submit.prevent="submitForm">
-                            <div class="form-group">
-                                <label for="username">用户名 *</label>
-                                <input 
-                                    type="text" 
-                                    id="username"
-                                    class="form-control" 
-                                    v-model="formData.username"
-                                    :class="{ 'error': formErrors.username }"
-                                    placeholder="请输入用户名"
-                                >
-                                <span v-if="formErrors.username" class="error-text">{{ formErrors.username }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">邮箱 *</label>
-                                <input 
-                                    type="email" 
-                                    id="email"
-                                    class="form-control" 
-                                    v-model="formData.email"
-                                    :class="{ 'error': formErrors.email }"
-                                    placeholder="请输入邮箱地址"
-                                >
-                                <span v-if="formErrors.email" class="error-text">{{ formErrors.email }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="password">密码 *</label>
-                                <input 
-                                    type="password" 
-                                    id="password"
-                                    class="form-control" 
-                                    v-model="formData.password"
-                                    :class="{ 'error': formErrors.password }"
-                                    placeholder="请输入密码"
-                                >
-                                <span v-if="formErrors.password" class="error-text">{{ formErrors.password }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="confirmPassword">确认密码 *</label>
-                                <input 
-                                    type="password" 
-                                    id="confirmPassword"
-                                    class="form-control" 
-                                    v-model="formData.confirmPassword"
-                                    :class="{ 'error': formErrors.confirmPassword }"
-                                    placeholder="请再次输入密码"
-                                >
-                                <span v-if="formErrors.confirmPassword" class="error-text">{{ formErrors.confirmPassword }}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="role">用户角色</label>
-                                <select id="role" class="form-control" v-model="formData.role">
-                                    <option value="USER">普通用户</option>
-                                    <option value="ADMIN">管理员</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="status">用户状态</label>
-                                <select id="status" class="form-control" v-model="formData.status">
-                                    <option value="ACTIVE">活跃</option>
-                                    <option value="INACTIVE">非活跃</option>
-                                    <option value="SUSPENDED">已暂停</option>
-                                </select>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> 保存用户
-                                </button>
-                                <button type="button" class="btn btn-secondary" @click="resetForm">
-                                    <i class="fas fa-undo"></i> 重置
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -252,6 +159,84 @@
                             placeholder="请输入邮箱地址"
                         >
                         <span v-if="formErrors.email" class="error-text">{{ formErrors.email }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-realName">真实姓名 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-realName"
+                            class="form-control" 
+                            v-model="formData.realName"
+                            :class="{ 'error': formErrors.realName }"
+                            placeholder="请输入真实姓名"
+                        >
+                        <span v-if="formErrors.realName" class="error-text">{{ formErrors.realName }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-studentId">学号 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-studentId"
+                            class="form-control" 
+                            v-model="formData.studentId"
+                            :class="{ 'error': formErrors.studentId }"
+                            placeholder="请输入学号"
+                        >
+                        <span v-if="formErrors.studentId" class="error-text">{{ formErrors.studentId }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-phoneNumber">手机号 *</label>
+                        <input 
+                            type="tel" 
+                            id="modal-phoneNumber"
+                            class="form-control" 
+                            v-model="formData.phoneNumber"
+                            :class="{ 'error': formErrors.phoneNumber }"
+                            placeholder="请输入手机号"
+                        >
+                        <span v-if="formErrors.phoneNumber" class="error-text">{{ formErrors.phoneNumber }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-university">大学 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-university"
+                            class="form-control" 
+                            v-model="formData.university"
+                            :class="{ 'error': formErrors.university }"
+                            placeholder="请输入大学名称"
+                        >
+                        <span v-if="formErrors.university" class="error-text">{{ formErrors.university }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-major">专业 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-major"
+                            class="form-control" 
+                            v-model="formData.major"
+                            :class="{ 'error': formErrors.major }"
+                            placeholder="请输入专业名称"
+                        >
+                        <span v-if="formErrors.major" class="error-text">{{ formErrors.major }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-grade">年级 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-grade"
+                            class="form-control" 
+                            v-model="formData.grade"
+                            :class="{ 'error': formErrors.grade }"
+                            placeholder="请输入年级"
+                        >
+                        <span v-if="formErrors.grade" class="error-text">{{ formErrors.grade }}</span>
                     </div>
 
                     <div class="form-group">

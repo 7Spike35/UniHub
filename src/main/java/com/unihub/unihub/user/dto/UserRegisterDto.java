@@ -3,6 +3,7 @@ package com.unihub.unihub.user.dto;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import com.unihub.unihub.user.entity.UserRole;
 
 /**
  * 用户注册DTO
@@ -48,4 +49,6 @@ public class UserRegisterDto {
     @NotBlank(message = "年级不能为空")
     @Size(max = 20, message = "年级长度不能超过20个字符")
     private String grade;
+
+    private UserRole role;
 } 

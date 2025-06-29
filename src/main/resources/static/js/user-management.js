@@ -24,6 +24,12 @@ const UserManagementApp = {
                 email: '',
                 password: '',
                 confirmPassword: '',
+                realName: '',
+                studentId: '',
+                phoneNumber: '',
+                university: '',
+                major: '',
+                grade: '',
                 role: 'USER',
                 status: 'ACTIVE'
             },
@@ -125,6 +131,12 @@ const UserManagementApp = {
                 email: user.email,
                 password: '',
                 confirmPassword: '',
+                realName: user.realName,
+                studentId: user.studentId || '',
+                phoneNumber: user.phoneNumber || '',
+                university: user.university || '',
+                major: user.major || '',
+                grade: user.grade || '',
                 role: user.role,
                 status: user.status
             };
@@ -147,6 +159,12 @@ const UserManagementApp = {
                 email: '',
                 password: '',
                 confirmPassword: '',
+                realName: '',
+                studentId: '',
+                phoneNumber: '',
+                university: '',
+                major: '',
+                grade: '',
                 role: 'USER',
                 status: 'ACTIVE'
             };
@@ -169,14 +187,47 @@ const UserManagementApp = {
                 this.formErrors.email = '请输入有效的邮箱地址';
             }
             
-            if (this.modalMode === 'add' && !this.formData.password) {
-                this.formErrors.password = '密码不能为空';
-            } else if (this.formData.password && this.formData.password.length < 6) {
-                this.formErrors.password = '密码至少需要6个字符';
+            if (this.modalMode === 'add') {
+                // 添加模式下的验证
+                if (!this.formData.realName.trim()) {
+                    this.formErrors.realName = '真实姓名不能为空';
+                }
+                
+                if (!this.formData.studentId.trim()) {
+                    this.formErrors.studentId = '学号不能为空';
+                }
+                
+                if (!this.formData.university.trim()) {
+                    this.formErrors.university = '大学不能为空';
+                }
+                
+                if (!this.formData.major.trim()) {
+                    this.formErrors.major = '专业不能为空';
+                }
+                
+                if (!this.formData.grade.trim()) {
+                    this.formErrors.grade = '年级不能为空';
+                }
+                
+                if (!this.formData.password) {
+                    this.formErrors.password = '密码不能为空';
+                } else if (this.formData.password.length < 6) {
+                    this.formErrors.password = '密码至少需要6个字符';
+                }
+            } else {
+                // 编辑模式下的验证
+                if (this.formData.password && this.formData.password.length < 6) {
+                    this.formErrors.password = '密码至少需要6个字符';
+                }
             }
             
             if (this.formData.password && this.formData.password !== this.formData.confirmPassword) {
                 this.formErrors.confirmPassword = '两次输入的密码不一致';
+            }
+            
+            // 手机号格式验证（如果填写了的话）
+            if (this.formData.phoneNumber && !this.isValidPhone(this.formData.phoneNumber)) {
+                this.formErrors.phoneNumber = '手机号格式不正确';
             }
             
             return Object.keys(this.formErrors).length === 0;
@@ -188,6 +239,12 @@ const UserManagementApp = {
             return emailRegex.test(email);
         },
         
+        // 验证手机号格式
+        isValidPhone(phone) {
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            return phoneRegex.test(phone);
+        },
+        
         // 提交表单
         async submitForm() {
             if (!this.validateForm()) {
@@ -195,18 +252,43 @@ const UserManagementApp = {
             }
             
             try {
-                const url = this.modalMode === 'add' ? '/api/users/register' : `/api/users/${this.formData.id}`;
-                const method = this.modalMode === 'add' ? 'POST' : 'PUT';
+                let url, method;
+                
+                if (this.modalMode === 'add') {
+                    url = '/api/users/register';
+                    method = 'POST';
+                } else {
+                    // 编辑模式，确保id不为null
+                    if (!this.formData.id) {
+                        this.showMessage('用户ID不能为空', 'error');
+                        return;
+                    }
+                    url = `/api/users/${this.formData.id}`;
+                    method = 'PUT';
+                }
                 
                 const requestData = {
                     username: this.formData.username,
                     email: this.formData.email,
+                    password: this.formData.password,
+                    confirmPassword: this.formData.confirmPassword,
+                    realName: this.formData.realName || this.formData.username, // 如果没有真实姓名，使用用户名
+                    studentId: this.formData.studentId || '', // 学号可以为空
+                    phoneNumber: this.formData.phoneNumber || '', // 手机号可以为空
+                    university: this.formData.university || '未知大学',
+                    major: this.formData.major || '未知专业',
+                    grade: this.formData.grade || '未知年级',
                     role: this.formData.role,
                     status: this.formData.status
                 };
                 
-                if (this.formData.password) {
-                    requestData.password = this.formData.password;
+                // 如果是编辑模式，不需要密码确认字段
+                if (this.modalMode === 'edit') {
+                    delete requestData.confirmPassword;
+                    // 编辑模式下，如果没有设置密码，则不传递密码字段
+                    if (!this.formData.password) {
+                        delete requestData.password;
+                    }
                 }
                 
                 const response = await fetch(url, {

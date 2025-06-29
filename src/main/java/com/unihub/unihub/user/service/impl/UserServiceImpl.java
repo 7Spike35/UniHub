@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(registerDto, user);
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(UserStatus.ACTIVE);
-        user.setRole(UserRole.STUDENT);
+        user.setRole(registerDto.getRole());
 
         User savedUser = userRepository.save(user);
         return convertToVo(savedUser);
@@ -138,6 +138,12 @@ public class UserServiceImpl implements UserService {
         }
         if (updateDto.getGrade() != null) {
             user.setGrade(updateDto.getGrade());
+        }
+        if (updateDto.getRole() != null) {
+            user.setRole(updateDto.getRole());
+        }
+        if (updateDto.getStatus() != null) {
+            user.setStatus(updateDto.getStatus());
         }
 
         User savedUser = userRepository.save(user);

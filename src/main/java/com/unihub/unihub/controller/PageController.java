@@ -11,6 +11,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PageController {
 
     /**
+     * 登录页面
+     */
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    /**
+     * 系统主页（仪表板）
+     */
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard";
+    }
+
+    /**
      * 用户管理页面
      */
     @GetMapping("/user-management")
@@ -19,10 +35,10 @@ public class PageController {
     }
 
     /**
-     * 首页
+     * 首页 - 重定向到登录页面
      */
     @GetMapping("/")
     public String index() {
-        return "redirect:/user-management";
+        return "redirect:/login";
     }
 } 

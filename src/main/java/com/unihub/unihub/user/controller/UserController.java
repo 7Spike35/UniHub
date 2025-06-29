@@ -46,10 +46,51 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ApiResponse<String> login(@Valid @RequestBody UserLoginDto loginDto) {
+    public ApiResponse<Map<String, Object>> login(@Valid @RequestBody UserLoginDto loginDto) {
         try {
             String token = userService.login(loginDto);
-            return ApiResponse.success("登录成功", token);
+            // 获取用户信息
+            UserVo userVo = userService.getUserByUsername(loginDto.getUsername());
+            
+            // 创建返回结果
+            Map<String, Object> result = Map.of(
+                "token", token,
+                "user", userVo
+            );
+            
+            return ApiResponse.success("登录成功", result);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取当前用户资料
+     */
+    @GetMapping("/profile")
+    public ApiResponse<UserVo> getCurrentUserProfile(@RequestParam String username) {
+        try {
+            UserVo userVo = userService.getUserByUsername(username);
+            return ApiResponse.success(userVo);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 修改密码
+     */
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(@RequestBody Map<String, String> request) {
+        try {
+            String username = request.get("username");
+            String oldPassword = request.get("oldPassword");
+            String newPassword = request.get("newPassword");
+            
+            // 根据用户名获取用户ID
+            UserVo userVo = userService.getUserByUsername(username);
+            userService.changePassword(userVo.getId(), oldPassword, newPassword);
+            return ApiResponse.success("密码修改成功", null);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
         }
@@ -95,7 +136,7 @@ public class UserController {
     }
 
     /**
-     * 修改密码
+     * 修改密码（旧版本，保留兼容性）
      */
     @PutMapping("/{id}/password")
     public ApiResponse<Void> changePassword(@PathVariable Long id, 
