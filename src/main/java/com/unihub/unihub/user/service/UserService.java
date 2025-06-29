@@ -68,6 +68,11 @@ public interface UserService {
     Page<UserVo> getUserList(UserStatus status, Pageable pageable);
     
     /**
+     * 获取所有用户（不分页）
+     */
+    List<UserVo> getAllUsers();
+    
+    /**
      * 搜索用户
      */
     Page<UserVo> searchUsers(UserStatus status, String keyword, Pageable pageable);

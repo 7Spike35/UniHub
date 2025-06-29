@@ -149,6 +149,19 @@ public class UserController {
     }
 
     /**
+     * 获取所有用户（不分页）
+     */
+    @GetMapping
+    public ApiResponse<List<UserVo>> getAllUsers() {
+        try {
+            List<UserVo> users = userService.getAllUsers();
+            return ApiResponse.success(users);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    /**
      * 获取用户列表
      */
     @GetMapping("/list")

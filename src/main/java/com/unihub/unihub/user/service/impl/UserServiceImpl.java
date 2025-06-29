@@ -199,6 +199,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserVo> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(this::convertToVo).toList();
+    }
+
+    @Override
     public Page<UserVo> searchUsers(UserStatus status, String keyword, Pageable pageable) {
         Page<User> userPage = userRepository.searchUsers(status, keyword, pageable);
         return userPage.map(this::convertToVo);

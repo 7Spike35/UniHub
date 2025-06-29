@@ -1,10 +1,14 @@
 package com.unihub.unihub.user.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户信息更新DTO
  */
+@Getter
+@Setter
 public class UserUpdateDto {
     @Size(max = 50, message = "真实姓名长度不能超过50个字符")
     private String realName;
@@ -23,53 +27,4 @@ public class UserUpdateDto {
 
     @Size(max = 20, message = "年级长度不能超过20个字符")
     private String grade;
-
-    // Getters and Setters
-    public String getRealName() {
-        return realName;
-    }
-
-    public void setRealName(String realName) {
-        this.realName = realName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public String getUniversity() {
-        return university;
-    }
-
-    public void setUniversity(String university) {
-        this.university = university;
-    }
-
-    public String getMajor() {
-        return major;
-    }
-
-    public void setMajor(String major) {
-        this.major = major;
-    }
-
-    public String getGrade() {
-        return grade;
-    }
-
-    public void setGrade(String grade) {
-        this.grade = grade;
-    }
 } 

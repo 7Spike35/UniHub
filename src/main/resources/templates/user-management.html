@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniHub - 用户管理</title>
+    <link rel="stylesheet" href="/css/user-management.css">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="user-management-app">
+        <div class="container">
+            <!-- 页面头部 -->
+            <div class="header">
+                <h1><i class="fas fa-users"></i> UniHub 用户管理</h1>
+                <p>管理系统用户账户、权限和状态</p>
+            </div>
+
+            <!-- 主要内容区域 -->
+            <div class="content">
+                <!-- 标签页导航 -->
+                <div class="tabs">
+                    <button 
+                        class="tab" 
+                        :class="{ active: activeTab === 'list' }"
+                        @click="switchTab('list')"
+                    >
+                        <i class="fas fa-list"></i> 用户列表
+                    </button>
+                    <button 
+                        class="tab" 
+                        :class="{ active: activeTab === 'add' }"
+                        @click="switchTab('add')"
+                    >
+                        <i class="fas fa-plus"></i> 添加用户
+                    </button>
+                </div>
+
+                <!-- 消息提示 -->
+                <div v-if="message.show" class="alert" :class="'alert-' + message.type">
+                    <i :class="message.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                    {{ message.text }}
+                </div>
+
+                <!-- 用户列表标签页 -->
+                <div v-if="activeTab === 'list'">
+                    <!-- 搜索和操作栏 -->
+                    <div class="search-container">
+                        <div class="search-input">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                placeholder="搜索用户名、邮箱或角色..."
+                                v-model="searchKeyword"
+                                @input="searchUsers"
+                            >
+                        </div>
+                        <button class="btn btn-primary" @click="showAddUserModal">
+                            <i class="fas fa-plus"></i> 添加用户
+                        </button>
+                    </div>
+
+                    <!-- 用户列表表格 -->
+                    <div class="table-container">
+                        <div v-if="loading" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> 加载中...
+                        </div>
+                        
+                        <div v-else-if="displayUsers.length === 0" class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>暂无用户数据</h3>
+                            <p>点击"添加用户"按钮开始创建用户账户</p>
+                        </div>
+                        
+                        <table v-else class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="user in displayUsers" :key="user.id">
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <strong>{{ user.username }}</strong>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="role-badge" :class="'role-' + user.role.toLowerCase()">
+                                            {{ getRoleText(user.role) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge" :class="'status-' + (user.status === 'ACTIVE' ? 'active' : 'inactive')">
+                                            {{ getStatusText(user.status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ formatDate(user.createTime) }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button 
+                                                class="btn btn-secondary" 
+                                                @click="showEditUserModal(user)"
+                                                title="编辑用户"
+                                            >
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button 
+                                                class="btn btn-danger" 
+                                                @click="showConfirmDelete(user)"
+                                                title="删除用户"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 添加用户标签页 -->
+                <div v-if="activeTab === 'add'">
+                    <div class="form-container">
+                        <h3><i class="fas fa-user-plus"></i> 添加新用户</h3>
+                        <form @submit.prevent="submitForm">
+                            <div class="form-group">
+                                <label for="username">用户名 *</label>
+                                <input 
+                                    type="text" 
+                                    id="username"
+                                    class="form-control" 
+                                    v-model="formData.username"
+                                    :class="{ 'error': formErrors.username }"
+                                    placeholder="请输入用户名"
+                                >
+                                <span v-if="formErrors.username" class="error-text">{{ formErrors.username }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">邮箱 *</label>
+                                <input 
+                                    type="email" 
+                                    id="email"
+                                    class="form-control" 
+                                    v-model="formData.email"
+                                    :class="{ 'error': formErrors.email }"
+                                    placeholder="请输入邮箱地址"
+                                >
+                                <span v-if="formErrors.email" class="error-text">{{ formErrors.email }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">密码 *</label>
+                                <input 
+                                    type="password" 
+                                    id="password"
+                                    class="form-control" 
+                                    v-model="formData.password"
+                                    :class="{ 'error': formErrors.password }"
+                                    placeholder="请输入密码"
+                                >
+                                <span v-if="formErrors.password" class="error-text">{{ formErrors.password }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">确认密码 *</label>
+                                <input 
+                                    type="password" 
+                                    id="confirmPassword"
+                                    class="form-control" 
+                                    v-model="formData.confirmPassword"
+                                    :class="{ 'error': formErrors.confirmPassword }"
+                                    placeholder="请再次输入密码"
+                                >
+                                <span v-if="formErrors.confirmPassword" class="error-text">{{ formErrors.confirmPassword }}</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="role">用户角色</label>
+                                <select id="role" class="form-control" v-model="formData.role">
+                                    <option value="USER">普通用户</option>
+                                    <option value="ADMIN">管理员</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="status">用户状态</label>
+                                <select id="status" class="form-control" v-model="formData.status">
+                                    <option value="ACTIVE">活跃</option>
+                                    <option value="INACTIVE">非活跃</option>
+                                    <option value="SUSPENDED">已暂停</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存用户
+                                </button>
+                                <button type="button" class="btn btn-secondary" @click="resetForm">
+                                    <i class="fas fa-undo"></i> 重置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户表单模态框 -->
+        <div v-if="showModal" class="modal" @click="closeModal">
+            <div class="modal-content" @click.stop>
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ modalTitle }}</h3>
+                    <button class="close-btn" @click="closeModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form @submit.prevent="submitForm">
+                    <div class="form-group">
+                        <label for="modal-username">用户名 *</label>
+                        <input 
+                            type="text" 
+                            id="modal-username"
+                            class="form-control" 
+                            v-model="formData.username"
+                            :class="{ 'error': formErrors.username }"
+                            placeholder="请输入用户名"
+                        >
+                        <span v-if="formErrors.username" class="error-text">{{ formErrors.username }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-email">邮箱 *</label>
+                        <input 
+                            type="email" 
+                            id="modal-email"
+                            class="form-control" 
+                            v-model="formData.email"
+                            :class="{ 'error': formErrors.email }"
+                            placeholder="请输入邮箱地址"
+                        >
+                        <span v-if="formErrors.email" class="error-text">{{ formErrors.email }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-password">{{ modalMode === 'add' ? '密码 *' : '密码（留空则不修改）' }}</label>
+                        <input 
+                            type="password" 
+                            id="modal-password"
+                            class="form-control" 
+                            v-model="formData.password"
+                            :class="{ 'error': formErrors.password }"
+                            :placeholder="modalMode === 'add' ? '请输入密码' : '留空则不修改密码'"
+                        >
+                        <span v-if="formErrors.password" class="error-text">{{ formErrors.password }}</span>
+                    </div>
+
+                    <div class="form-group" v-if="formData.password">
+                        <label for="modal-confirmPassword">确认密码 *</label>
+                        <input 
+                            type="password" 
+                            id="modal-confirmPassword"
+                            class="form-control" 
+                            v-model="formData.confirmPassword"
+                            :class="{ 'error': formErrors.confirmPassword }"
+                            placeholder="请再次输入密码"
+                        >
+                        <span v-if="formErrors.confirmPassword" class="error-text">{{ formErrors.confirmPassword }}</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-role">用户角色</label>
+                        <select id="modal-role" class="form-control" v-model="formData.role">
+                            <option value="USER">普通用户</option>
+                            <option value="ADMIN">管理员</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-status">用户状态</label>
+                        <select id="modal-status" class="form-control" v-model="formData.status">
+                            <option value="ACTIVE">活跃</option>
+                            <option value="INACTIVE">非活跃</option>
+                            <option value="SUSPENDED">已暂停</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ modalMode === 'add' ? '添加用户' : '更新用户' }}
+                        </button>
+                        <button type="button" class="btn btn-secondary" @click="closeModal">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 确认删除模态框 -->
+        <div v-if="confirmDelete.show" class="modal" @click="closeConfirmDelete">
+            <div class="modal-content" @click.stop>
+                <div class="modal-header">
+                    <h3 class="modal-title">确认删除</h3>
+                    <button class="close-btn" @click="closeConfirmDelete">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <p>您确定要删除用户 <strong>"{{ confirmDelete.username }}"</strong> 吗？</p>
+                    <p class="text-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        此操作不可撤销，请谨慎操作！
+                    </p>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-danger" @click="deleteUser">
+                        <i class="fas fa-trash"></i> 确认删除
+                    </button>
+                    <button class="btn btn-secondary" @click="closeConfirmDelete">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载 JavaScript 文件 -->
+    <script src="/js/user-management.js"></script>
+</body>
+</html> 
