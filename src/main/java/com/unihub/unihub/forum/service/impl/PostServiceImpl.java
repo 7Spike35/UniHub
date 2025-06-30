@@ -41,7 +41,7 @@ public class PostServiceImpl implements PostService {
         if (mediaFiles != null) {
             for (MultipartFile file : mediaFiles) {
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                String filePath = "src/main/resources/static/upload/" + fileName;
+                String filePath = "upload/" + fileName;
                 try {
                     file.transferTo(new java.io.File(filePath));
                 } catch (Exception e) {
