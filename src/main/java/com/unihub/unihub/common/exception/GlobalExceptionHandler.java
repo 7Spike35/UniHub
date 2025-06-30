@@ -75,6 +75,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<String> handleRuntimeException(RuntimeException ex) {
+        ex.printStackTrace();
         return ApiResponse.error(ex.getMessage());
     }
 
@@ -84,6 +85,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<String> handleException(Exception ex) {
+        ex.printStackTrace();
         return ApiResponse.error("系统内部错误");
     }
 } 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>讨论区</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>UniHub</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+            </div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <div id="forum-app" class="centered-container">
+            <div class="forum-container" style="width: 900px; max-width: 98vw; margin: 40px auto;">
+                <div class="forum-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="margin:0;"><i class="fas fa-comments"></i> 讨论区</h2>
+                    <button class="btn btn-primary" @click="goToPostCreate"><i class="fas fa-pen"></i> 发帖</button>
+                </div>
+                <div v-if="loading" class="loading">加载中...</div>
+                <div v-else-if="posts.length === 0" class="empty-state">暂无帖子，快来发帖吧！</div>
+                <div v-else>
+                    <div class="post-list">
+                        <div class="post-item card" v-for="post in posts" :key="post.id">
+                            <div class="post-header" style="display:flex;justify-content:space-between;align-items:center;">
+                                <div class="post-user"><i class="fas fa-user-circle"></i> 用户ID: {{ post.userId }}</div>
+                                <div class="post-time"><i class="fas fa-clock"></i> {{ formatDate(post.createTime) }}</div>
+                            </div>
+                            <div class="post-content" style="margin: 12px 0 8px 0; font-size: 16px;">{{ post.content }}</div>
+                            <div class="post-media" style="margin-bottom: 4px;">
+                                <img v-for="media in post.mediaList.filter(m => m.type === 'image')" :src="media.url" :key="media.id" class="preview-img">
+                                <video v-for="media in post.mediaList.filter(m => m.type === 'video')" :src="media.url" :key="media.id" class="preview-video" controls width="200"></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="/js/forum.js"></script>
+    <style>
+        .centered-container { display: flex; justify-content: center; align-items: flex-start; min-height: 80vh; }
+        .forum-container { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 32px 32px 24px 32px; }
+        .post-list { display: flex; flex-direction: column; gap: 24px; }
+        .post-item.card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 20px 24px; background: #fafbfc; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+        .post-header { font-size: 14px; color: #888; margin-bottom: 8px; }
+        .post-content { font-size: 16px; margin-bottom: 8px; }
+        .preview-img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
+        .preview-video { border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; }
+    </style>
+</body>
+</html> 

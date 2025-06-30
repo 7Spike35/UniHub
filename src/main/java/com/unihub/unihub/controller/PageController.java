@@ -41,4 +41,20 @@ public class PageController {
     public String index() {
         return "redirect:/login";
     }
+
+    /**
+     * 讨论区页面
+     */
+    @GetMapping("/forum")
+    public String forum() {
+        return "forum";
+    }
+
+    /**
+     * 发帖页面
+     */
+    @GetMapping("/post-create")
+    public String postCreate() {
+        return "post-create";
+    }
 } 

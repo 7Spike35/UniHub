@@ -1,4 +1,4 @@
-package com.unihub.unihub;
+package com.unihub.unihub.forum;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

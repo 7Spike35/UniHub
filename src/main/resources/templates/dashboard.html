@@ -36,12 +36,11 @@
                     <a href="#" class="nav-link" :class="{ active: activePage === 'profile' }" @click="switchPage('profile')">
                         <i class="fas fa-user-circle"></i> 个人资料
                     </a>
-                    
-                    <!-- 待定菜单 -->
+
                     <a href="#" class="nav-link">
                         <i class="fas fa-book"></i> 学习资源
                     </a>
-                    <a href="#" class="nav-link">
+                    <a href="/forum" class="nav-link">
                         <i class="fas fa-comments"></i> 讨论区
                     </a>
                     <a href="#" class="nav-link">
@@ -153,7 +152,7 @@
                             <p>浏览学习资料</p>
                         </div>
                         
-                        <div class="action-card">
+                        <div class="action-card" onclick="window.location.href='/forum.html'">
                             <i class="fas fa-comments"></i>
                             <h3>讨论区</h3>
                             <p>参与学习讨论</p>

@@ -65,9 +65,13 @@ public class User {
     @Column(name = "last_login_time")
     private LocalDateTime lastLoginTime;
 
+    @Column(name = "post_count", nullable = false)
+    private Integer postCount = 0;
+
     // 构造函数
     public User() {
         this.createdTime = LocalDateTime.now();
+        this.postCount = 0;
     }
 
     @PreUpdate
