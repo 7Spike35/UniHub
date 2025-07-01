@@ -5,12 +5,13 @@ import com.unihub.unihub.forum.service.PostService;
 import com.unihub.unihub.forum.entity.PostMedia;
 import com.unihub.unihub.forum.repository.PostMediaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.io.File;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -21,13 +22,34 @@ public class PostController {
     @Autowired
     private PostMediaRepository postMediaRepository;
 
-    @PostMapping
-    public Post createPost(
-            @RequestParam Long userId,
-            @RequestParam String content,
-            @RequestParam(required = false) List<MultipartFile> mediaFiles
-    ) {
-        return postService.createPost(userId, content, mediaFiles);
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createPost(
+            @RequestParam("userId") Long userId,
+            @RequestParam("content") String content,
+            @RequestParam(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles) {
+        
+        try {
+            // 确保上传目录存在
+            File uploadDirFile = new File(uploadDir);
+            if (!uploadDirFile.exists()) {
+                uploadDirFile.mkdirs();
+            }
+            
+            Post post = postService.createPost(userId, content, mediaFiles);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "发帖成功",
+                "post", post
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "发帖失败: " + e.getMessage()
+            ));
+        }
     }
 
     @GetMapping("/list")
