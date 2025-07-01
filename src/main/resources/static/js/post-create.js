@@ -2,6 +2,18 @@ const { createApp } = Vue;
 
 createApp({
     data() {
+        let userId = 1;
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const userObj = JSON.parse(userStr);
+                if (userObj && userObj.id) {
+                    userId = userObj.id;
+                }
+            } catch (e) {
+                // 解析失败，保持默认userId=1
+            }
+        }
         return {
             content: '',
             imageFiles: [],
@@ -10,7 +22,7 @@ createApp({
             videoPreviews: [],
             message: '',
             messageType: '',
-            userId: 1 // TODO: 实际项目应从登录信息获取
+            userId: userId
         };
     },
     methods: {
