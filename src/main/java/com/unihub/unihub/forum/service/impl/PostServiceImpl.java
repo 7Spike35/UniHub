@@ -39,13 +39,21 @@ public class PostServiceImpl implements PostService {
         post = postRepository.save(post);
         // 保存媒体
         if (mediaFiles != null) {
+            // 检查upload目录权限
+            java.io.File dir = new java.io.File("upload");
+            System.out.println("upload目录绝对路径: " + dir.getAbsolutePath());
+            System.out.println("upload目录是否存在: " + dir.exists());
+            System.out.println("upload目录是否可读: " + dir.canRead());
+            System.out.println("upload目录是否可写: " + dir.canWrite());
+            System.out.println("upload目录是否可执行: " + dir.canExecute());
             for (MultipartFile file : mediaFiles) {
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                 String filePath = "upload/" + fileName;
                 try {
                     file.transferTo(new java.io.File(filePath));
                 } catch (Exception e) {
-                    throw new RuntimeException("文件上传失败");
+                    e.printStackTrace(); // 控制台输出详细异常
+                    throw new RuntimeException("文件上传失败: " + e.getMessage(), e); // 返回详细异常信息
                 }
                 String type = file.getContentType() != null && file.getContentType().startsWith("image") ? "image" : "video";
                 PostMedia media = new PostMedia();
