@@ -7,6 +7,8 @@ import com.unihub.unihub.user.dto.UserUpdateDto;
 import com.unihub.unihub.user.entity.UserStatus;
 import com.unihub.unihub.user.service.UserService;
 import com.unihub.unihub.user.vo.UserVo;
+import com.unihub.unihub.forum.entity.Post;
+import com.unihub.unihub.forum.repository.PostRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PostRepository postRepository;
 
     /**
      * 用户注册
@@ -302,6 +307,19 @@ public class UserController {
         try {
             boolean available = userService.isStudentIdAvailable(studentId);
             return ApiResponse.success(available);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取指定用户发帖列表
+     */
+    @GetMapping("/{id}/posts")
+    public ApiResponse<List<Post>> getUserPosts(@PathVariable Long id) {
+        try {
+            List<Post> posts = postRepository.findByUserId(id);
+            return ApiResponse.success(posts);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
         }

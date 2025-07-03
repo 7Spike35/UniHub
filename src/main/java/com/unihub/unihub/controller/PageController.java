@@ -57,4 +57,12 @@ public class PageController {
     public String postCreate() {
         return "post-create";
     }
+
+    /**
+     * 帖子详情页面
+     */
+    @GetMapping("/post-detail/{id}")
+    public String postDetail() {
+        return "post-detail";
+    }
 } 

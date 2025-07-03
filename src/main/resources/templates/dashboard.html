@@ -34,7 +34,7 @@
                     
                     <!-- 所有用户菜单 -->
                     <a href="#" class="nav-link" :class="{ active: activePage === 'profile' }" @click="switchPage('profile')">
-                        <i class="fas fa-user-circle"></i> 个人资料
+                        <i class="fas fa-user-circle"></i> 个人主页
                     </a>
 
                     <a href="#" class="nav-link">
@@ -254,11 +254,10 @@
                 </div>
             </div>
 
-            <!-- 个人资料页面 -->
+            <!-- 个人主页页面 -->
             <div v-if="activePage === 'profile'" class="page-content">
                 <div class="profile-container">
-                    <h1>个人资料</h1>
-                    
+                    <h1>个人主页</h1>
                     <div class="profile-form">
                         <div class="form-row">
                             <div class="form-group">
@@ -334,6 +333,25 @@
                         </div>
                     </div>
                 </div>
+                <!-- 我发的帖子 -->
+                <div class="my-posts-container">
+                    <h2 style="margin-top:32px;">我发的帖子</h2>
+                    <div v-if="loadingPosts" class="loading">加载中...</div>
+                    <div v-else-if="myPosts.length === 0" class="empty-state">暂无发帖</div>
+                    <div v-else class="my-posts-list">
+                        <div class="my-post-item card" v-for="post in myPosts" :key="post.id">
+                            <div class="my-post-header" style="display:flex;justify-content:space-between;align-items:center;">
+                                <div><i class="fas fa-clock"></i> {{ formatDate(post.createTime) }}</div>
+                                <button class="btn-icon delete-btn" @click="deleteMyPost(post.id)" title="删除帖子"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <div class="my-post-content" style="margin: 12px 0 8px 0; font-size: 16px;">{{ post.content }}</div>
+                            <div class="my-post-media" style="margin-bottom: 4px;">
+                                <img v-for="media in post.mediaList?.filter(m => m.type === 'image')" :src="media.url" :key="media.id" class="preview-img">
+                                <video v-for="media in post.mediaList?.filter(m => m.type === 'video')" :src="media.url" :key="media.id" class="preview-video" controls width="200"></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -374,5 +392,16 @@
 
     <!-- 加载 JavaScript 文件 -->
     <script src="/js/dashboard.js"></script>
+    <style>
+        .my-posts-container { margin-top: 32px; }
+        .my-posts-list { display: flex; flex-direction: column; gap: 24px; }
+        .my-post-item.card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 20px 24px; background: #fafbfc; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+        .my-post-header { font-size: 14px; color: #888; margin-bottom: 8px; }
+        .my-post-content { font-size: 16px; margin-bottom: 8px; }
+        .preview-img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
+        .preview-video { border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
+        .btn-icon.delete-btn { background: transparent; color: #dc3545; border: none; font-size: 18px; cursor: pointer; margin-left: 10px; transition: color 0.2s; }
+        .btn-icon.delete-btn:hover { color: #fff; background: #dc3545; }
+    </style>
 </body>
 </html> 

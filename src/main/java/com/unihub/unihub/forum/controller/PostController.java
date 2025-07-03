@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.*;
 
+import com.unihub.unihub.forum.vo.PostDetailVo;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -67,5 +69,37 @@ public class PostController {
             result.add(map);
         }
         return result;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPostDetail(@PathVariable Long id) {
+        try {
+            PostDetailVo detail = postService.getPostDetail(id);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", detail
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id, @RequestParam Long operatorUserId) {
+        try {
+            postService.deletePost(id, operatorUserId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "删除成功"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
     }
 } 

@@ -8,6 +8,7 @@ import com.unihub.unihub.forum.repository.PostRepository;
 import com.unihub.unihub.forum.service.PostService;
 import com.unihub.unihub.user.repository.UserRepository;
 import com.unihub.unihub.user.entity.User;
+import com.unihub.unihub.forum.vo.PostDetailVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,5 +156,41 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> getAllPosts() {
         return postRepository.findAll();
+    }
+
+    @Override
+    public PostDetailVo getPostDetail(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("帖子不存在"));
+        User user = userRepository.findById(post.getUserId())
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        List<PostMedia> mediaList = postMediaRepository.findByPostId(postId);
+        PostDetailVo vo = new PostDetailVo();
+        vo.setPostId(post.getId());
+        vo.setContent(post.getContent());
+        vo.setNickname(user.getUsername());
+        vo.setUniversity(user.getUniversity());
+        vo.setMajor(user.getMajor());
+        vo.setMediaList(mediaList);
+        return vo;
+    }
+
+    @Override
+    public void deletePost(Long postId, Long operatorUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("帖子不存在"));
+        User operator = userRepository.findById(operatorUserId)
+                .orElseThrow(() -> new RuntimeException("操作用户不存在"));
+        // 只有管理员或发帖人本人可删除
+        if (!operator.getRole().name().equals("ADMIN") && !Objects.equals(post.getUserId(), operatorUserId)) {
+            throw new RuntimeException("无权限删除该帖子");
+        }
+        // 删除媒体文件
+        List<PostMedia> mediaList = postMediaRepository.findByPostId(postId);
+        for (PostMedia media : mediaList) {
+            postMediaRepository.delete(media);
+            // 可选：删除服务器上的实际文件
+        }
+        postRepository.delete(post);
     }
 } 

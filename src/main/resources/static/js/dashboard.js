@@ -38,7 +38,10 @@ createApp({
             allUsers: [],
             filteredUsers: [],
             searchKeyword: '',
-            statusFilter: 'ACTIVE'
+            statusFilter: 'ACTIVE',
+            // 新增：我的帖子相关
+            myPosts: [],
+            loadingPosts: false
         }
     },
     computed: {
@@ -58,6 +61,10 @@ createApp({
             // 如果切换到用户管理页面，加载用户数据
             if (page === 'user-management') {
                 this.loadUsers();
+            }
+            // 新增：切换到个人主页时加载我的帖子
+            if (page === 'profile') {
+                this.loadMyPosts();
             }
         },
 
@@ -480,6 +487,52 @@ createApp({
                     this.showMessage('error', '网络错误，请稍后重试');
                 }
             }
+        },
+
+        async loadMyPosts() {
+            if (!this.user) return;
+            this.loadingPosts = true;
+            try {
+                const resp = await fetch(`/api/users/${this.user.id}/posts`);
+                const data = await resp.json();
+                if (data.success) {
+                    // 需要为每个帖子加载媒体
+                    const posts = data.data;
+                    for (const post of posts) {
+                        // 获取媒体
+                        const mediaResp = await fetch(`/api/posts/${post.id}`);
+                        const mediaData = await mediaResp.json();
+                        if (mediaData.success && mediaData.data) {
+                            post.mediaList = mediaData.data.mediaList || [];
+                        } else {
+                            post.mediaList = [];
+                        }
+                    }
+                    this.myPosts = posts;
+                } else {
+                    this.myPosts = [];
+                }
+            } catch (e) {
+                this.myPosts = [];
+            }
+            this.loadingPosts = false;
+        },
+
+        async deleteMyPost(postId) {
+            if (!confirm('确定要删除该帖子吗？')) return;
+            try {
+                const operatorUserId = this.user.id;
+                const resp = await fetch(`/api/posts/${postId}?operatorUserId=${operatorUserId}`, { method: 'DELETE' });
+                const data = await resp.json();
+                if (data.success) {
+                    this.myPosts = this.myPosts.filter(p => p.id !== postId);
+                    alert('删除成功');
+                } else {
+                    alert('删除失败：' + data.message);
+                }
+            } catch (e) {
+                alert('删除失败');
+            }
         }
     },
 
@@ -506,6 +559,11 @@ createApp({
 
         // 添加点击外部关闭菜单的事件监听
         document.addEventListener('click', this.handleClickOutside);
+
+        // 新增：进入个人主页时自动加载我的帖子
+        if (this.activePage === 'profile') {
+            this.loadMyPosts();
+        }
     },
 
     beforeUnmount() {
