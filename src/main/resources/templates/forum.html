@@ -34,7 +34,7 @@
                     <div class="post-list">
                         <div class="post-item card" v-for="post in posts" :key="post.id" @click="goToPostDetail(post.id)" style="cursor:pointer; position:relative;">
                             <div class="post-header" style="display:flex;justify-content:space-between;align-items:center;">
-                                <div class="post-user"><i class="fas fa-user-circle"></i> 用户ID: {{ post.userId }}</div>
+                                <div class="post-user"><i class="fas fa-user-circle"></i> {{ post.nickname || '用户' + post.userId }}</div>
                                 <div class="post-time"><i class="fas fa-clock"></i> {{ formatDate(post.createTime) }}</div>
                                 <button v-if="isAdmin()" class="btn-icon delete-btn" @click.stop="deletePost(post.id)" title="删除帖子"><i class="fas fa-times"></i></button>
                             </div>

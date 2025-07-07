@@ -4,6 +4,7 @@ import com.unihub.unihub.forum.entity.Post;
 import com.unihub.unihub.forum.service.PostService;
 import com.unihub.unihub.forum.entity.PostMedia;
 import com.unihub.unihub.forum.repository.PostMediaRepository;
+import com.unihub.unihub.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,9 @@ public class PostController {
 
     @Autowired
     private PostMediaRepository postMediaRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -64,8 +68,16 @@ public class PostController {
             map.put("userId", post.getUserId());
             map.put("content", post.getContent());
             map.put("createTime", post.getCreateTime());
+            
+            // 获取用户信息
+            com.unihub.unihub.user.entity.User user = userRepository.findById(post.getUserId())
+                .orElse(new com.unihub.unihub.user.entity.User());
+            map.put("nickname", user.getUsername() != null ? user.getUsername() : "用户" + post.getUserId());
+            
+            // 获取媒体文件
             List<PostMedia> mediaList = postMediaRepository.findByPostId(post.getId());
             map.put("mediaList", mediaList);
+            
             result.add(map);
         }
         return result;
