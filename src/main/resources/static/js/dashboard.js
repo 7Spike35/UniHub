@@ -445,47 +445,59 @@ createApp({
             window.open(`/user-management?edit=${user.id}`, '_blank');
         },
 
-        async toggleUserStatus(user) {
-            const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-            const statusText = newStatus === 'ACTIVE' ? '启用' : '禁用';
-
-            if (confirm(`确定要${statusText}用户 "${user.realName}" 吗？`)) {
-                try {
-                    const response = await fetch(`/api/users/${user.id}/status?status=${newStatus}`, {
-                        method: 'PUT'
-                    });
-
-                    if (response.ok) {
-                        user.status = newStatus;
-                        this.showMessage('success', `用户${statusText}成功`);
-                    } else {
-                        this.showMessage('error', '操作失败，请稍后重试');
-                    }
-                } catch (error) {
-                    console.error('切换用户状态失败:', error);
-                    this.showMessage('error', '网络错误，请稍后重试');
+        async deleteMyPost(postId) {
+            if (!confirm('确定要删除该帖子吗？')) return;
+            try {
+                const operatorUserId = this.user.id;
+                const resp = await fetch(`/api/posts/${postId}?operatorUserId=${operatorUserId}`, { method: 'DELETE' });
+                const data = await resp.json();
+                if (data.success) {
+                    this.myPosts = this.myPosts.filter(p => p.id !== postId);
+                    this.showMessage('success', '删除成功');
+                } else {
+                    this.showMessage('error', '删除失败：' + data.message);
                 }
+            } catch (e) {
+                this.showMessage('error', '删除失败');
             }
         },
 
         async deleteUser(user) {
-            if (confirm(`确定要删除用户 "${user.realName}" 吗？此操作不可恢复！`)) {
-                try {
-                    const response = await fetch(`/api/users/${user.id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        this.allUsers = this.allUsers.filter(u => u.id !== user.id);
-                        this.filterUsers();
-                        this.showMessage('success', '用户删除成功');
-                    } else {
-                        this.showMessage('error', '删除失败，请稍后重试');
-                    }
-                } catch (error) {
-                    console.error('删除用户失败:', error);
-                    this.showMessage('error', '网络错误，请稍后重试');
+            if (!confirm(`确定要删除用户 "${user.realName}" 吗？此操作不可恢复！`)) return;
+            try {
+                const response = await fetch(`/api/users/${user.id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    this.allUsers = this.allUsers.filter(u => u.id !== user.id);
+                    this.filterUsers();
+                    this.showMessage('success', '用户删除成功');
+                } else {
+                    this.showMessage('error', '删除失败，请稍后重试');
                 }
+            } catch (error) {
+                console.error('删除用户失败:', error);
+                this.showMessage('error', '网络错误，请稍后重试');
+            }
+        },
+
+        async toggleUserStatus(user) {
+            const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            const statusText = newStatus === 'ACTIVE' ? '启用' : '禁用';
+            if (!confirm(`确定要${statusText}用户 "${user.realName}" 吗？`)) return;
+            try {
+                const response = await fetch(`/api/users/${user.id}/status?status=${newStatus}`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    user.status = newStatus;
+                    this.showMessage('success', `用户${statusText}成功`);
+                } else {
+                    this.showMessage('error', '操作失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('切换用户状态失败:', error);
+                this.showMessage('error', '网络错误，请稍后重试');
             }
         },
 
@@ -495,16 +507,20 @@ createApp({
             try {
                 const resp = await fetch(`/api/users/${this.user.id}/posts`);
                 const data = await resp.json();
-                if (data.success) {
-                    // 需要为每个帖子加载媒体
+                if ((data.success && data.data) || (data.code === 200 && data.data)) {
                     const posts = data.data;
                     for (const post of posts) {
-                        // 获取媒体
-                        const mediaResp = await fetch(`/api/posts/${post.id}`);
-                        const mediaData = await mediaResp.json();
-                        if (mediaData.success && mediaData.data) {
-                            post.mediaList = mediaData.data.mediaList || [];
-                        } else {
+                        try {
+                            // 获取媒体
+                            const mediaResp = await fetch(`/api/posts/${post.id}`);
+                            const mediaData = await mediaResp.json();
+                            if ((mediaData.success && mediaData.data) || (mediaData.code === 200 && mediaData.data)) {
+                                post.mediaList = mediaData.data.mediaList || [];
+                            } else {
+                                post.mediaList = [];
+                            }
+                        } catch (mediaErr) {
+                            console.error('加载媒体失败:', mediaErr);
                             post.mediaList = [];
                         }
                     }
@@ -513,26 +529,22 @@ createApp({
                     this.myPosts = [];
                 }
             } catch (e) {
+                console.error('加载我的帖子失败:', e);
                 this.myPosts = [];
+            } finally {
+                this.loadingPosts = false;
             }
-            this.loadingPosts = false;
         },
 
-        async deleteMyPost(postId) {
-            if (!confirm('确定要删除该帖子吗？')) return;
-            try {
-                const operatorUserId = this.user.id;
-                const resp = await fetch(`/api/posts/${postId}?operatorUserId=${operatorUserId}`, { method: 'DELETE' });
-                const data = await resp.json();
-                if (data.success) {
-                    this.myPosts = this.myPosts.filter(p => p.id !== postId);
-                    alert('删除成功');
-                } else {
-                    alert('删除失败：' + data.message);
-                }
-            } catch (e) {
-                alert('删除失败');
-            }
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const h = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d} ${h}:${min}`;
         }
     },
 
@@ -560,10 +572,8 @@ createApp({
         // 添加点击外部关闭菜单的事件监听
         document.addEventListener('click', this.handleClickOutside);
 
-        // 新增：进入个人主页时自动加载我的帖子
-        if (this.activePage === 'profile') {
-            this.loadMyPosts();
-        }
+        // 强制加载一次我的帖子
+        await this.loadMyPosts();
     },
 
     beforeUnmount() {
