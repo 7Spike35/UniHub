@@ -4,11 +4,22 @@ import java.util.List;
 
 public class PostDetailVo {
     private Long postId;
+    private Long userId;
     private String content;
     private String university;
     private String major;
     private String nickname;
+    private String userAvatar;
     private List<com.unihub.unihub.forum.entity.PostMedia> mediaList;
+    
+    // Interaction counts
+    private int likeCount;
+    private int favoriteCount;
+    private int commentCount;
+    
+    // User interaction status
+    private boolean isLiked;
+    private boolean isFavorited;
 
     public Long getPostId() {
         return postId;
@@ -46,4 +57,60 @@ public class PostDetailVo {
     public void setMediaList(List<com.unihub.unihub.forum.entity.PostMedia> mediaList) {
         this.mediaList = mediaList;
     }
-} 
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public int getFavoriteCount() {
+        return favoriteCount;
+    }
+
+    public void setFavoriteCount(int favoriteCount) {
+        this.favoriteCount = favoriteCount;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
+    }
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+    }
+
+    public boolean isFavorited() {
+        return isFavorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        isFavorited = favorited;
+    }
+}

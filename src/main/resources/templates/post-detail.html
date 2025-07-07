@@ -3,10 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>帖子详情</title>
+    <title>帖子详情 - UniHub</title>
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        body {
+            background-color: #f7f8fa;
+        }
+        .post-detail-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 24px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        .post-time {
+            color: #8590a6;
+            font-size: 14px;
+        }
+        .post-content {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .interaction-bar {
+            display: flex;
+            padding: 12px 0;
+            margin: 16px 0;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .interaction-btn {
+            display: flex;
+            align-items: center;
+            margin-right: 24px;
+            background: none;
+            border: none;
+            color: #8590a6;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .interaction-btn:hover {
+            background: #f7f8fa;
+        }
+        .interaction-btn.active {
+            color: #1890ff;
+        }
+        .interaction-btn i {
+            margin-right: 4px;
+            font-size: 16px;
+        }
+        .media-container {
+            margin: 16px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .media-item {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 4px;
+            cursor: pointer;
+            object-fit: contain;
+            background: #f7f8fa;
+        }
+        .comments-section {
+            margin-top: 32px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 8px;
+            color: #1890ff;
+        }
+        .comment-form {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .comment-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .comment-submit-btn {
+            padding: 6px 16px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            float: right;
+        }
+        .comment-submit-btn:hover {
+            background: #40a9ff;
+        }
+        .comment-submit-btn:disabled {
+            background: #bae7ff;
+            cursor: not-allowed;
+        }
+        .comments-list {
+            margin-top: 16px;
+        }
+        .comment-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        .comment-author {
+            font-weight: 600;
+            font-size: 14px;
+            color: #444;
+        }
+        .comment-time {
+            font-size: 12px;
+            color: #8590a6;
+            margin-left: 8px;
+        }
+        .comment-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding-left: 44px;
+            word-break: break-word;
+        }
+        .empty-comments {
+            text-align: center;
+            color: #8590a6;
+            padding: 40px 0;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            color: #8590a6;
+        }
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        .big-image {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            cursor: default;
+        }
+        @media (max-width: 768px) {
+            .post-detail-container {
+                margin: 0;
+                border-radius: 0;
+                padding: 16px;
+            }
+            .interaction-btn {
+                margin-right: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -22,105 +240,99 @@
         </div>
     </nav>
     <main class="main-content">
-        <div id="post-detail-app" class="centered-container">
-            <div class="post-detail-container card" style="width: 600px; max-width: 98vw; margin: 40px auto; padding: 32px;">
-                <div v-if="loading" class="loading">加载中...</div>
-                <div v-else-if="!detail" class="empty-state">未找到该帖子</div>
-                <div v-else>
-                    <h2 style="margin-bottom: 18px;"><i class="fas fa-file-alt"></i> 帖子详情</h2>
-                    <div class="detail-row"><strong>昵称：</strong> {{ detail.nickname }}</div>
-                    <div class="detail-row"><strong>大学：</strong> {{ detail.university }}</div>
-                    <div class="detail-row"><strong>专业：</strong> {{ detail.major }}</div>
-                    <div class="detail-row"><strong>内容：</strong> {{ detail.content }}</div>
-                    <div class="detail-row" v-if="detail.mediaList && detail.mediaList.length > 0">
-                        <div>
-                            <img v-for="media in detail.mediaList.filter(m => m.type === 'image')"
-                                 :src="media.url" :key="media.id" class="preview-img"
-                                 @click="showImage(media.url)" style="cursor:pointer;">
-                            <video v-for="media in detail.mediaList.filter(m => m.type === 'video')"
-                                   :src="media.url" :key="media.id" class="preview-video"
-                                   controls width="200"
-                                   @click="requestVideoFullscreen($event)"></video>
+        <div id="post-detail-app">
+            <div v-if="loading" class="loading">加载中...</div>
+            <div v-else-if="!detail" class="empty-state">未找到该帖子</div>
+            <div v-else class="post-detail-container">
+                <!-- 帖子内容 -->
+                <div class="post-content-card">
+                    <div class="post-header">
+                        <img v-if="detail.userAvatar" :src="detail.userAvatar" class="user-avatar" alt="用户头像">
+                        <div class="user-info">
+                            <div class="user-name">{{ detail.nickname || '用户' + detail.userId }}</div>
+                            <div class="post-time">{{ formatTime(detail.createTime) }}</div>
                         </div>
+                    </div>
+                    
+                    <div class="post-content">
+                        {{ detail.content }}
+                    </div>
+                    
+                    <!-- 媒体文件 -->
+                    <div v-if="detail.mediaList && detail.mediaList.length > 0" class="media-container">
+                        <img v-for="media in detail.mediaList.filter(m => m.type === 'image')"
+                             :src="media.url" :key="media.id" class="media-item"
+                             @click="showImage(media.url)">
+                        <video v-for="media in detail.mediaList.filter(m => m.type === 'video')"
+                               :src="media.url" :key="media.id" class="media-item"
+                               controls @click="requestVideoFullscreen($event)">
+                            您的浏览器不支持 video 标签。
+                        </video>
+                    </div>
+                    
+                    <!-- 互动按钮 -->
+                    <div class="interaction-bar">
+                        <button class="interaction-btn" :class="{'active': detail.liked}" @click="toggleLike">
+                            <i class="fas" :class="detail.liked ? 'fa-heart' : 'fa-heart-o'"></i>
+                            <span>{{ detail.likeCount || 0 }}</span>
+                        </button>
+                        <button class="interaction-btn" :class="{'active': detail.favorited}" @click="toggleFavorite">
+                            <i class="fas" :class="detail.favorited ? 'fa-star' : 'fa-star-o'"></i>
+                            <span>{{ detail.favoriteCount || 0 }}</span>
+                        </button>
+                        <button class="interaction-btn" @click="scrollToComments">
+                            <i class="far fa-comment"></i>
+                            <span>{{ detail.commentCount || 0 }}</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 评论区 -->
+                <div id="comments-section" class="comments-section">
+                    <h3 class="section-title">
+                        <i class="far fa-comments"></i>
+                        评论 ({{ detail.commentCount || 0 }})
+                    </h3>
+                    
+                    <!-- 评论表单 -->
+                    <div class="comment-form">
+                        <textarea v-model="newComment" class="comment-textarea" 
+                                  placeholder="写下你的评论..." rows="3"></textarea>
+                        <button @click="submitComment" class="comment-submit-btn" 
+                                :disabled="!newComment.trim()">
+                            发表评论
+                        </button>
+                        <div style="clear: both;"></div>
+                    </div>
+                    
+                    <!-- 评论列表 -->
+                    <div v-if="commentLoading" class="loading">加载评论中...</div>
+                    <div v-else-if="comments.length > 0" class="comments-list">
+                        <div v-for="comment in comments" :key="comment.id" class="comment-item">
+                            <div class="comment-header">
+                                <img v-if="comment.avatarUrl" :src="comment.avatarUrl" class="comment-avatar" alt="评论者头像">
+                                <div class="comment-author">
+                                    {{ comment.nickname || '用户' + comment.userId }}
+                                    <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                {{ comment.content }}
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-comments">
+                        暂无评论，快来抢沙发吧~
                     </div>
                 </div>
             </div>
+            
             <!-- 大图预览遮罩 -->
             <div v-if="showBigImage" class="image-modal" @click="closeImage">
                 <img :src="bigImageUrl" class="big-image" @click.stop>
             </div>
         </div>
     </main>
-    <script>
-        const app = Vue.createApp({
-            data() {
-                return {
-                    loading: true,
-                    detail: null,
-                    showBigImage: false,
-                    bigImageUrl: ''
-                };
-            },
-            mounted() {
-                const postId = window.location.pathname.split('/').pop();
-                fetch(`/api/posts/${postId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            this.detail = data.data;
-                        }
-                        this.loading = false;
-                    })
-                    .catch(() => {
-                        this.loading = false;
-                    });
-            },
-            methods: {
-                showImage(url) {
-                    this.bigImageUrl = url;
-                    this.showBigImage = true;
-                },
-                closeImage() {
-                    this.showBigImage = false;
-                    this.bigImageUrl = '';
-                },
-                requestVideoFullscreen(event) {
-                    const video = event.target;
-                    if (video.requestFullscreen) {
-                        video.requestFullscreen();
-                    } else if (video.webkitRequestFullscreen) {
-                        video.webkitRequestFullscreen();
-                    } else if (video.mozRequestFullScreen) {
-                        video.mozRequestFullScreen();
-                    } else if (video.msRequestFullscreen) {
-                        video.msRequestFullscreen();
-                    }
-                }
-            }
-        });
-        app.mount('#post-detail-app');
-    </script>
-    <style>
-        .centered-container { display: flex; justify-content: center; align-items: flex-start; min-height: 80vh; }
-        .post-detail-container.card { border: 1px solid #f0f0f0; border-radius: 8px; background: #fafbfc; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-        .detail-row { font-size: 16px; margin-bottom: 16px; }
-        .preview-img { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
-        .preview-video { border-radius: 4px; margin-right: 8px; border: 1px solid #eee; }
-        .image-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .big-image {
-            max-width: 90vw;
-            max-height: 90vh;
-            border-radius: 8px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.3);
-        }
-    </style>
+    <script src="/js/post-detail.js"></script>
 </body>
 </html> 

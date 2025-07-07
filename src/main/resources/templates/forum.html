@@ -39,9 +39,23 @@
                                 <button v-if="isAdmin()" class="btn-icon delete-btn" @click.stop="deletePost(post.id)" title="删除帖子"><i class="fas fa-times"></i></button>
                             </div>
                             <div class="post-content" style="margin: 12px 0 8px 0; font-size: 16px;">{{ post.content }}</div>
-                            <div class="post-media" style="margin-bottom: 4px;">
+                            <div class="post-media" style="margin-bottom: 12px;">
                                 <img v-for="media in post.mediaList.filter(m => m.type === 'image')" :src="media.url" :key="media.id" class="preview-img">
                                 <video v-for="media in post.mediaList.filter(m => m.type === 'video')" :src="media.url" :key="media.id" class="preview-video" controls width="200"></video>
+                            </div>
+                            <div class="post-actions" style="display: flex; gap: 16px; padding: 8px 0; border-top: 1px solid #f0f0f0;">
+                                <button class="btn-icon" @click.stop="toggleLike(post)" :class="{ 'text-primary': post.liked }">
+                                    <i class="fas" :class="post.liked ? 'fa-heart' : 'fa-heart-o'"></i>
+                                    <span>{{ post.likeCount || 0 }}</span>
+                                </button>
+                                <button class="btn-icon" @click.stop="toggleFavorite(post)" :class="{ 'text-warning': post.favorited }">
+                                    <i class="fas" :class="post.favorited ? 'fa-star' : 'fa-star-o'"></i>
+                                    <span>{{ post.favoriteCount || 0 }}</span>
+                                </button>
+                                <button class="btn-icon" @click.stop="goToPostDetail(post.id, true)">
+                                    <i class="far fa-comment"></i>
+                                    <span>{{ post.commentCount || 0 }}</span>
+                                </button>
                             </div>
                         </div>
                     </div>

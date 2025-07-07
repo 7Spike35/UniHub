@@ -6,8 +6,12 @@ import com.unihub.unihub.forum.entity.PostMedia;
 import com.unihub.unihub.forum.repository.PostMediaRepository;
 import com.unihub.unihub.forum.repository.PostRepository;
 import com.unihub.unihub.forum.service.PostService;
+import com.unihub.unihub.forum.service.PostLikeService;
+import com.unihub.unihub.forum.service.PostFavoriteService;
+import com.unihub.unihub.forum.service.CommentService;
 import com.unihub.unihub.user.repository.UserRepository;
 import com.unihub.unihub.user.entity.User;
+import com.unihub.unihub.forum.dto.PostDto;
 import com.unihub.unihub.forum.vo.PostDetailVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +45,15 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private PostLikeService postLikeService;
+    
+    @Autowired
+    private PostFavoriteService postFavoriteService;
+    
+    @Autowired
+    private CommentService commentService;
 
     @Override
     public Post createPost(Long userId, String content, List<MultipartFile> mediaFiles) {
@@ -154,24 +167,78 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public List<PostDto> getAllPosts(Long currentUserId) {
+        List<Post> posts = postRepository.findAll();
+        List<PostDto> dtos = new ArrayList<>();
+        for (Post post : posts) {
+            User user = userRepository.findById(post.getUserId()).orElse(new User());
+            List<PostMedia> mediaList = postMediaRepository.findByPostId(post.getId());
+
+            int likeCount = postLikeService.getLikeCount(post.getId());
+            int favoriteCount = postFavoriteService.getFavoriteCount(post.getId());
+            int commentCount = commentService.getCommentCount(post.getId());
+            boolean isLiked = currentUserId != null && postLikeService.isLiked(post.getId(), currentUserId);
+            boolean isFavorited = currentUserId != null && postFavoriteService.isFavorited(post.getId(), currentUserId);
+
+            PostDto dto = new PostDto(
+                post.getId(),
+                post.getUserId(),
+                user.getUsername(),
+                post.getContent(),
+                post.getCreateTime(),
+                mediaList,
+                likeCount,
+                favoriteCount,
+                commentCount,
+                isLiked,
+                isFavorited
+            );
+            dtos.add(dto);
+        }
+        return dtos;
     }
 
     @Override
     public PostDetailVo getPostDetail(Long postId) {
+        return getPostDetail(postId, null);
+    }
+    
+    @Override
+    public PostDetailVo getPostDetail(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("帖子不存在"));
         User user = userRepository.findById(post.getUserId())
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
         List<PostMedia> mediaList = postMediaRepository.findByPostId(postId);
+        
+        // 获取互动数据
+        int likeCount = postLikeService.getLikeCount(postId);
+        int favoriteCount = postFavoriteService.getFavoriteCount(postId);
+        int commentCount = commentService.getCommentCount(postId);
+        
+        // 检查当前用户是否已点赞/收藏
+        boolean isLiked = currentUserId != null && postLikeService.isLiked(postId, currentUserId);
+        boolean isFavorited = currentUserId != null && postFavoriteService.isFavorited(postId, currentUserId);
+        
         PostDetailVo vo = new PostDetailVo();
         vo.setPostId(post.getId());
+        vo.setUserId(post.getUserId());
         vo.setContent(post.getContent());
-        vo.setNickname(user.getUsername());
+        vo.setNickname(user.getUsername() != null ? user.getUsername() : "用户" + user.getId());
+        // 使用用户头像，如果没有则使用默认头像
+        String avatar = user.getAvatarUrl() != null ? user.getAvatarUrl() : "/images/default-avatar.png";
+        vo.setUserAvatar(avatar);
         vo.setUniversity(user.getUniversity());
         vo.setMajor(user.getMajor());
         vo.setMediaList(mediaList);
+        
+        // 设置互动数据
+        vo.setLikeCount(likeCount);
+        vo.setFavoriteCount(favoriteCount);
+        vo.setCommentCount(commentCount);
+        vo.setLiked(isLiked);
+        vo.setFavorited(isFavorited);
+        
         return vo;
     }
 
