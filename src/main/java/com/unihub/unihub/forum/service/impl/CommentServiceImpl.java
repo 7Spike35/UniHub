@@ -37,11 +37,10 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment(postId, userId, content, parentId);
         comment = commentRepository.save(comment);
 
-        String username = userRepository.findById(userId)
-                .map(user -> user.getUsername())
-                .orElse("未知用户");
+        com.unihub.unihub.user.entity.User user = userRepository.findById(userId)
+                .orElse(null);
 
-        return convertToDto(comment, username);
+        return convertToDto(comment, user);
     }
 
     @Override
@@ -56,18 +55,15 @@ public class CommentServiceImpl implements CommentService {
                 .map(Comment::getUserId)
                 .collect(Collectors.toSet());
 
-        Map<Long, String> usernameMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(
-                        user -> user.getId(),
-                        user -> user.getUsername() != null ? user.getUsername() : "用户" + user.getId(),
-                        (existing, replacement) -> existing
-                ));
+                Map<Long, com.unihub.unihub.user.entity.User> userMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(com.unihub.unihub.user.entity.User::getId, user -> user));
 
         Map<Long, CommentDto> commentMap = new HashMap<>();
         List<CommentDto> rootComments = new ArrayList<>();
 
         for (Comment comment : comments) {
-            CommentDto dto = convertToDto(comment, usernameMap.getOrDefault(comment.getUserId(), "未知用户"));
+            com.unihub.unihub.user.entity.User user = userMap.get(comment.getUserId());
+            CommentDto dto = convertToDto(comment, user);
             commentMap.put(comment.getId(), dto);
         }
 
@@ -131,10 +127,16 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    private CommentDto convertToDto(Comment comment, String username) {
+    private CommentDto convertToDto(Comment comment, com.unihub.unihub.user.entity.User user) {
         CommentDto dto = new CommentDto();
         BeanUtils.copyProperties(comment, dto);
-        dto.setUsername(username);
+        if (user != null) {
+            dto.setUsername(user.getUsername() != null ? user.getUsername() : "用户" + user.getId());
+            dto.setUserAvatar(user.getAvatarUrl() != null ? user.getAvatarUrl() : "/images/default-avatar.png");
+        } else {
+            dto.setUsername("未知用户");
+            dto.setUserAvatar("/images/default-avatar.png");
+        }
         return dto;
     }
 }

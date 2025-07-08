@@ -247,9 +247,13 @@
                 <!-- 帖子内容 -->
                 <div class="post-content-card">
                     <div class="post-header">
-                        <img v-if="detail.userAvatar" :src="detail.userAvatar" class="user-avatar" alt="用户头像">
+                        <a :href="'/user/' + detail.userId">
+                            <img v-if="detail.userAvatar" :src="detail.userAvatar" class="user-avatar" alt="用户头像">
+                        </a>
                         <div class="user-info">
-                            <div class="user-name">{{ detail.nickname || '用户' + detail.userId }}</div>
+                            <a :href="'/user/' + detail.userId" style="text-decoration: none; color: inherit;">
+                                <div class="user-name">{{ detail.nickname || '用户' + detail.userId }}</div>
+                            </a>
                             <div class="post-time">{{ formatTime(detail.createTime) }}</div>
                         </div>
                     </div>
@@ -310,9 +314,13 @@
                     <div v-else-if="comments.length > 0" class="comments-list">
                         <div v-for="comment in comments" :key="comment.id" class="comment-item">
                             <div class="comment-header">
-                                <img v-if="comment.avatarUrl" :src="comment.avatarUrl" class="comment-avatar" alt="评论者头像">
+                                <a :href="'/user/' + comment.userId">
+                                                                        <img v-if="comment.userAvatar" :src="comment.userAvatar" class="comment-avatar" alt="评论者头像">
+                                </a>
                                 <div class="comment-author">
-                                    {{ comment.nickname || '用户' + comment.userId }}
+                                    <a :href="'/user/' + comment.userId" style="text-decoration: none; color: inherit;">
+                                                                        {{ comment.username || '用户' + comment.userId }}
+                                    </a>
                                     <span class="comment-time">{{ formatTime(comment.createTime) }}</span>
                                 </div>
                             </div>

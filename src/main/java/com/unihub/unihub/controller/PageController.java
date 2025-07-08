@@ -65,4 +65,12 @@ public class PageController {
     public String postDetail() {
         return "post-detail";
     }
+
+    /**
+     * 用户主页
+     */
+    @GetMapping("/user/{id}")
+    public String userProfile() {
+        return "user-profile";
+    }
 } 

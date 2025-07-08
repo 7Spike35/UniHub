@@ -4,6 +4,7 @@ package com.unihub.unihub.common.response;
  * 统一API响应格式
  */
 public class ApiResponse<T> {
+    private boolean success;
     private Integer code;
     private String message;
     private T data;
@@ -18,6 +19,7 @@ public class ApiResponse<T> {
         this.message = message;
         this.data = data;
         this.timestamp = System.currentTimeMillis();
+        this.success = (code == 200);
     }
 
     public static <T> ApiResponse<T> success(T data) {
@@ -34,6 +36,14 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> error(Integer code, String message) {
         return new ApiResponse<>(code, message, null);
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     // Getters and Setters
