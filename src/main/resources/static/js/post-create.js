@@ -13,7 +13,7 @@ createApp({
                 type: '',
                 show: false
             },
-            userId: 1, // TODO: 实际项目应从登录信息获取
+            userId: null,
             isSubmitting: false,
             MAX_IMAGES: 10,
             MAX_VIDEOS: 3,
@@ -184,6 +184,11 @@ createApp({
         
         // 提交帖子
         async submitPost() {
+            // 检查用户登录状态
+            if (!this.checkUserLogin()) {
+                return;
+            }
+            
             // 验证表单
             if (!this.content.trim()) {
                 this.showMessage('帖子内容不能为空', 'error');
@@ -238,6 +243,42 @@ createApp({
             } finally {
                 this.isSubmitting = false;
             }
+        },
+        
+        // 获取当前登录用户ID
+        getCurrentUserId() {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    return user.id;
+                } catch (e) {
+                    console.error('解析用户信息失败:', e);
+                    return null;
+                }
+            }
+            return null;
+        },
+        
+        // 检查用户是否已登录
+        checkUserLogin() {
+            const userId = this.getCurrentUserId();
+            if (!userId) {
+                this.showMessage('请先登录后再发帖', 'error');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return false;
+            }
+            this.userId = userId;
+            return true;
+        }
+    },
+    
+    mounted() {
+        // 检查用户登录状态
+        if (!this.checkUserLogin()) {
+            return;
         }
     }
 }).mount('#post-create-app'); 

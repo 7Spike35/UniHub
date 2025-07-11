@@ -248,4 +248,65 @@ body {
 
 .fa-spin {
     animation: spin 1s linear infinite;
+}
+
+/* 单选按钮组样式 */
+.radio-group {
+    display: flex;
+    gap: 30px;
+    margin-top: 5px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+    color: #667eea;
+}
+
+.radio-option input[type="radio"] {
+    display: none;
+}
+
+.radio-label {
+    position: relative;
+    padding-left: 30px;
+    line-height: 1.5;
+}
+
+.radio-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e1e5e9;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label::before {
+    border-color: #667eea;
+    background: #667eea;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
 } 

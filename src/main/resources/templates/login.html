@@ -283,9 +283,15 @@
 
                         <div class="form-group">
                             <label>性别 *</label>
-                            <div>
-                                <label><input type="radio" value="男" v-model="registerForm.gender" required> 男</label>
-                                <label style="margin-left:20px;"><input type="radio" value="女" v-model="registerForm.gender"> 女</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" value="男" v-model="registerForm.gender" required>
+                                    <span class="radio-label">男</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" value="女" v-model="registerForm.gender">
+                                    <span class="radio-label">女</span>
+                                </label>
                             </div>
                             <span v-if="formErrors.gender" class="error-text">{{ formErrors.gender }}</span>
                         </div>
