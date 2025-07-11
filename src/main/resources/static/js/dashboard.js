@@ -44,7 +44,9 @@ createApp({
             loadingPosts: false,
             // 我的收藏
             favoritePosts: [],
-            loadingFavorites: false
+            loadingFavorites: false,
+            // 新增：个人主页Tab切换
+            profileTab: 'posts'
         }
     },
     computed: {
