@@ -5,13 +5,16 @@ const UserProfileApp = {
             user: null,
             postsLoading: true,
             posts: [],
-            userId: null
+            userId: null,
+            favoritesLoading: true,
+            favoritePosts: []
         };
     },
     created() {
         this.userId = window.location.pathname.split('/').pop();
         this.fetchUserData();
         this.fetchUserPosts();
+        this.fetchFavorites();
     },
     methods: {
         async fetchUserData() {
@@ -44,6 +47,40 @@ const UserProfileApp = {
                 console.error('Error fetching user posts:', error);
             } finally {
                 this.postsLoading = false;
+            }
+        },
+        async fetchFavorites() {
+            this.favoritesLoading = true;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    this.favoritePosts = [];
+                    return;
+                }
+                const response = await fetch(`/api/posts/favorites/user/${user.id}`);
+                const responseData = await response.json();
+                if (responseData.success) {
+                    this.favoritePosts = responseData.data;
+                } else {
+                    this.favoritePosts = [];
+                }
+            } catch (error) {
+                this.favoritePosts = [];
+            } finally {
+                this.favoritesLoading = false;
+            }
+        },
+        async cancelFavorite(postId) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+            const resp = await fetch(`/api/posts/${postId}/favorite`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                this.favoritePosts = this.favoritePosts.filter(p => p.id !== postId);
             }
         },
         goToPost(postId) {

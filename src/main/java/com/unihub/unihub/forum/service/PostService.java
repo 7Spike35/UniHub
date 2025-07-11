@@ -12,4 +12,8 @@ public interface PostService {
     PostDetailVo getPostDetail(Long postId);
     PostDetailVo getPostDetail(Long postId, Long currentUserId);
     void deletePost(Long postId, Long operatorUserId);
+    /**
+     * 通过ID列表批量获取PostDto
+     */
+    List<PostDto> getPostsByIds(List<Long> ids, Long currentUserId);
 } 

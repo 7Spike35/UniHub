@@ -352,6 +352,25 @@
                         </div>
                     </div>
                 </div>
+                <!-- 我的收藏 -->
+                <div class="my-posts-container">
+                    <h2 style="margin-top:32px;">我的收藏</h2>
+                    <div v-if="loadingFavorites" class="loading">加载中...</div>
+                    <div v-else-if="favoritePosts.length === 0" class="empty-state">暂无收藏</div>
+                    <div v-else class="my-posts-list">
+                        <div class="my-post-item card" v-for="post in favoritePosts" :key="post.id">
+                            <div class="my-post-header" style="display:flex;justify-content:space-between;align-items:center;">
+                                <div><i class="fas fa-clock"></i> {{ formatDate(post.createTime) }}</div>
+                                <button class="btn-icon delete-btn" @click="cancelFavorite(post.id)" title="取消收藏"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="my-post-content" style="margin: 12px 0 8px 0; font-size: 16px; cursor:pointer;" @click="goToPost(post.id)">{{ post.content }}</div>
+                            <div class="my-post-media" style="margin-bottom: 4px;">
+                                <img v-for="media in post.mediaList?.filter(m => m.type === 'image')" :src="media.url" :key="media.id" class="preview-img">
+                                <video v-for="media in post.mediaList?.filter(m => m.type === 'video')" :src="media.url" :key="media.id" class="preview-video" controls width="200"></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 

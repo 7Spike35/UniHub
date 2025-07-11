@@ -9,12 +9,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.unihub.unihub.forum.dto.PostDto;
+import com.unihub.unihub.forum.entity.Post;
+import com.unihub.unihub.forum.repository.PostRepository;
+import com.unihub.unihub.user.entity.User;
+import com.unihub.unihub.user.repository.UserRepository;
+import com.unihub.unihub.forum.entity.PostMedia;
+import com.unihub.unihub.forum.repository.PostMediaRepository;
 
 @Service
 public class PostFavoriteServiceImpl implements PostFavoriteService {
 
     @Autowired
     private PostFavoriteRepository postFavoriteRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PostMediaRepository postMediaRepository;
 
     @Override
     @Transactional
@@ -57,5 +70,29 @@ public class PostFavoriteServiceImpl implements PostFavoriteService {
         return postFavoriteRepository.findByUserId(userId).stream()
                 .map(PostFavorite::getPostId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostDto> getFavoritePostsByUser(Long userId) {
+        List<PostFavorite> favorites = postFavoriteRepository.findByUserId(userId);
+        List<PostDto> result = new java.util.ArrayList<>();
+        for (PostFavorite fav : favorites) {
+            Post post = postRepository.findById(fav.getPostId()).orElse(null);
+            if (post != null) {
+                User user = userRepository.findById(post.getUserId()).orElse(new User());
+                List<PostMedia> mediaList = postMediaRepository.findByPostId(post.getId());
+                PostDto dto = new PostDto(
+                    post.getId(),
+                    post.getUserId(),
+                    user.getUsername(),
+                    post.getContent(),
+                    post.getCreateTime(),
+                    mediaList,
+                    0, 0, 0, false, true // 收藏列表无需点赞等数据
+                );
+                result.add(dto);
+            }
+        }
+        return result;
     }
 }

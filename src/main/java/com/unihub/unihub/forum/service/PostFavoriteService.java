@@ -1,6 +1,7 @@
 package com.unihub.unihub.forum.service;
 
 import java.util.List;
+import com.unihub.unihub.forum.dto.PostDto;
 
 public interface PostFavoriteService {
     /**
@@ -32,4 +33,11 @@ public interface PostFavoriteService {
      * @return 收藏的帖子ID列表
      */
     List<Long> getUserFavoritePostIds(Long userId);
+
+    /**
+     * 获取用户收藏的帖子
+     * @param userId 用户ID
+     * @return 收藏的帖子列表
+     */
+    List<PostDto> getFavoritePostsByUser(Long userId);
 }

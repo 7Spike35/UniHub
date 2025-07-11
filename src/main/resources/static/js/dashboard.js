@@ -41,7 +41,10 @@ createApp({
             statusFilter: 'ACTIVE',
             // 新增：我的帖子相关
             myPosts: [],
-            loadingPosts: false
+            loadingPosts: false,
+            // 我的收藏
+            favoritePosts: [],
+            loadingFavorites: false
         }
     },
     computed: {
@@ -65,6 +68,7 @@ createApp({
             // 新增：切换到个人主页时加载我的帖子
             if (page === 'profile') {
                 this.loadMyPosts();
+                this.loadFavorites();
             }
         },
 
@@ -536,6 +540,48 @@ createApp({
             }
         },
 
+        // 加载我的收藏
+        async loadFavorites() {
+            this.loadingFavorites = true;
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    this.favoritePosts = [];
+                    this.loadingFavorites = false;
+                    return;
+                }
+                const resp = await fetch(`/api/posts/favorites/user/${user.id}`);
+                const data = await resp.json();
+                if (data.success) {
+                    this.favoritePosts = data.data;
+                } else {
+                    this.favoritePosts = [];
+                }
+            } catch (e) {
+                this.favoritePosts = [];
+            } finally {
+                this.loadingFavorites = false;
+            }
+        },
+        // 取消收藏
+        async cancelFavorite(postId) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+            const resp = await fetch(`/api/posts/${postId}/favorite`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                this.favoritePosts = this.favoritePosts.filter(p => p.id !== postId);
+            }
+        },
+        // 跳转到帖子详情
+        goToPost(postId) {
+            window.location.href = `/post-detail/${postId}`;
+        },
+
         formatDate(dateStr) {
             if (!dateStr) return '';
             const date = new Date(dateStr);
@@ -574,6 +620,11 @@ createApp({
 
         // 强制加载一次我的帖子
         await this.loadMyPosts();
+
+        // 进入页面自动加载我的收藏
+        if (this.activePage === 'profile') {
+            await this.loadFavorites();
+        }
     },
 
     beforeUnmount() {

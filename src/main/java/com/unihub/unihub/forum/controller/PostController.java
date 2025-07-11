@@ -2,6 +2,7 @@ package com.unihub.unihub.forum.controller;
 
 import com.unihub.unihub.forum.entity.Post;
 import com.unihub.unihub.forum.service.PostService;
+import com.unihub.unihub.forum.service.PostFavoriteService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import com.unihub.unihub.forum.vo.PostDetailVo;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private PostFavoriteService postFavoriteService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -82,6 +86,22 @@ public class PostController {
             return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
                 "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/favorites/user/{userId}")
+    public ResponseEntity<?> getUserFavorites(@PathVariable Long userId) {
+        try {
+            List<PostDto> favorites = postFavoriteService.getFavoritePostsByUser(userId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "data", favorites
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "获取收藏失败: " + e.getMessage()
             ));
         }
     }

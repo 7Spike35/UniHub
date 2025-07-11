@@ -260,4 +260,34 @@ public class PostServiceImpl implements PostService {
         }
         postRepository.delete(post);
     }
+
+    @Override
+    public List<PostDto> getPostsByIds(List<Long> ids, Long currentUserId) {
+        List<Post> posts = postRepository.findAllById(ids);
+        List<PostDto> dtos = new ArrayList<>();
+        for (Post post : posts) {
+            User user = userRepository.findById(post.getUserId()).orElse(new User());
+            List<PostMedia> mediaList = postMediaRepository.findByPostId(post.getId());
+            int likeCount = postLikeService.getLikeCount(post.getId());
+            int favoriteCount = postFavoriteService.getFavoriteCount(post.getId());
+            int commentCount = commentService.getCommentCount(post.getId());
+            boolean isLiked = currentUserId != null && postLikeService.isLiked(post.getId(), currentUserId);
+            boolean isFavorited = currentUserId != null && postFavoriteService.isFavorited(post.getId(), currentUserId);
+            PostDto dto = new PostDto(
+                post.getId(),
+                post.getUserId(),
+                user.getUsername(),
+                post.getContent(),
+                post.getCreateTime(),
+                mediaList,
+                likeCount,
+                favoriteCount,
+                commentCount,
+                isLiked,
+                isFavorited
+            );
+            dtos.add(dto);
+        }
+        return dtos;
+    }
 } 
