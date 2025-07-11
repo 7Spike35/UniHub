@@ -48,6 +48,9 @@ public class User {
     @Column(name = "grade", length = 20)
     private String grade;
 
+    @Column(name = "gender", length = 2)
+    private String gender = "男";
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false)
     private UserStatus status = UserStatus.ACTIVE;

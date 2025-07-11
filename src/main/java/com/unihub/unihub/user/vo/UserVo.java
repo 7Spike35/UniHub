@@ -27,4 +27,5 @@ public class UserVo {
     private UserRole role;
     private LocalDateTime createdTime;
     private LocalDateTime lastLoginTime;
+    private String gender;
 } 

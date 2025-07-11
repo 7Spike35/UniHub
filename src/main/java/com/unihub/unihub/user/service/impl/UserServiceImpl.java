@@ -67,6 +67,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setStatus(UserStatus.ACTIVE);
         user.setRole(registerDto.getRole());
+        user.setGender(registerDto.getGender());
+        if (registerDto.getAvatarUrl() == null || registerDto.getAvatarUrl().isEmpty()) {
+            // 按性别赋默认头像
+            if ("女".equals(registerDto.getGender())) {
+                user.setAvatarUrl("/upload/default-female.png");
+            } else {
+                user.setAvatarUrl("/upload/default-male.png");
+            }
+        } else {
+            user.setAvatarUrl(registerDto.getAvatarUrl());
+        }
 
         User savedUser = userRepository.save(user);
         return convertToVo(savedUser);
@@ -312,8 +323,9 @@ public class UserServiceImpl implements UserService {
      * 将User实体转换为UserVo
      */
     private UserVo convertToVo(User user) {
-        UserVo userVo = new UserVo();
-        BeanUtils.copyProperties(user, userVo);
-        return userVo;
+        UserVo vo = new UserVo();
+        BeanUtils.copyProperties(user, vo);
+        vo.setGender(user.getGender());
+        return vo;
     }
 } 

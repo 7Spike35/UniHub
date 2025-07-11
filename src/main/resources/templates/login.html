@@ -281,6 +281,21 @@
                             <span v-if="formErrors.confirmPassword" class="error-text">{{ formErrors.confirmPassword }}</span>
                         </div>
 
+                        <div class="form-group">
+                            <label>性别 *</label>
+                            <div>
+                                <label><input type="radio" value="男" v-model="registerForm.gender" required> 男</label>
+                                <label style="margin-left:20px;"><input type="radio" value="女" v-model="registerForm.gender"> 女</label>
+                            </div>
+                            <span v-if="formErrors.gender" class="error-text">{{ formErrors.gender }}</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="register-avatar">头像（可选）</label>
+                            <input type="file" id="register-avatar" @change="onAvatarChange" accept="image/*">
+                            <span v-if="registerForm.avatarUrl">已选择头像</span>
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
                             <i v-if="loading" class="fas fa-spinner fa-spin"></i>
                             <i v-else class="fas fa-user-plus"></i>

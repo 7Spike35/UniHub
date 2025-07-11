@@ -50,5 +50,10 @@ public class UserRegisterDto {
     @Size(max = 20, message = "年级长度不能超过20个字符")
     private String grade;
 
+    @NotBlank(message = "性别不能为空")
+    private String gender;
+
+    private String avatarUrl;
+
     private UserRole role;
 } 

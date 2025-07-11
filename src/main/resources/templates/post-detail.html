@@ -6,6 +6,7 @@
     <title>帖子详情 - UniHub</title>
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <style>
         body {
@@ -276,13 +277,13 @@
                     
                     <!-- 互动按钮 -->
                     <div class="interaction-bar">
-                        <button class="interaction-btn" :class="{'active': detail.liked}" @click="toggleLike">
-                            <i class="fas" :class="detail.liked ? 'fa-heart' : 'fa-heart-o'"></i>
-                            <span>{{ detail.likeCount || 0 }}</span>
+                        <button class="interaction-btn" @click="toggleLike">
+                            <i class="fas" :class="detail.liked ? 'fa-heart' : 'fa-heart-o'" :style="detail.liked ? 'color: #e74c3c' : 'color: #888'"></i>
+                            <span v-if="detail.liked">{{ detail.likeCount }}</span>
                         </button>
-                        <button class="interaction-btn" :class="{'active': detail.favorited}" @click="toggleFavorite">
-                            <i class="fas" :class="detail.favorited ? 'fa-star' : 'fa-star-o'"></i>
-                            <span>{{ detail.favoriteCount || 0 }}</span>
+                        <button class="interaction-btn" @click="toggleFavorite">
+                            <i class="fas" :class="detail.favorited ? 'fa-star' : 'fa-star-o'" :style="detail.favorited ? 'color: #FFD700' : 'color: #888'"></i>
+                            <span v-if="detail.favorited">{{ detail.favoriteCount }}</span>
                         </button>
                         <button class="interaction-btn" @click="scrollToComments">
                             <i class="far fa-comment"></i>

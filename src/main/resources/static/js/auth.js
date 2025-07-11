@@ -28,7 +28,9 @@ createApp({
                 grade: '',
                 password: '',
                 confirmPassword: '',
-                role: 'STUDENT'
+                role: 'STUDENT',
+                gender: '',
+                avatarUrl: ''
             }
         }
     },
@@ -206,6 +208,29 @@ createApp({
             }
         },
 
+        // 头像选择与上传
+        async onAvatarChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const resp = await fetch('/api/upload/avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (resp.ok && data.data) {
+                    this.registerForm.avatarUrl = data.data.url;
+                    this.showMessage('success', '头像上传成功');
+                } else {
+                    this.showMessage('error', data.message || '头像上传失败');
+                }
+            } catch (e) {
+                this.showMessage('error', '头像上传异常');
+            }
+        },
+
         // 注册
         async register() {
             if (!this.validateRegisterForm()) {
@@ -230,7 +255,9 @@ createApp({
                         grade: this.registerForm.grade,
                         password: this.registerForm.password,
                         confirmPassword: this.registerForm.confirmPassword,
-                        role: this.registerForm.role
+                        role: this.registerForm.role,
+                        gender: this.registerForm.gender,
+                        avatarUrl: this.registerForm.avatarUrl
                     })
                 });
 
@@ -251,7 +278,9 @@ createApp({
                         grade: '',
                         password: '',
                         confirmPassword: '',
-                        role: 'STUDENT'
+                        role: 'STUDENT',
+                        gender: '',
+                        avatarUrl: ''
                     };
                     
                     // 切换到登录标签页
