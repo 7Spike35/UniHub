@@ -9,6 +9,8 @@ import com.unihub.unihub.user.service.UserService;
 import com.unihub.unihub.user.vo.UserVo;
 import com.unihub.unihub.forum.entity.Post;
 import com.unihub.unihub.forum.repository.PostRepository;
+import com.unihub.unihub.forum.dto.PostDto;
+import com.unihub.unihub.forum.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +35,9 @@ public class UserController {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private PostService postService;
 
     /**
      * 用户注册
@@ -316,10 +321,14 @@ public class UserController {
      * 获取指定用户发帖列表
      */
     @GetMapping("/{id}/posts")
-    public ApiResponse<List<Post>> getUserPosts(@PathVariable Long id) {
+    public ApiResponse<List<PostDto>> getUserPosts(@PathVariable Long id) {
         try {
-            List<Post> posts = postRepository.findByUserId(id);
-            return ApiResponse.success(posts);
+            // 获取所有帖子，筛选出该用户的帖子
+            List<PostDto> allPosts = postService.getAllPosts(id);
+            List<PostDto> userPosts = allPosts.stream()
+                    .filter(post -> post.getUserId().equals(id))
+                    .toList();
+            return ApiResponse.success(userPosts);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
         }

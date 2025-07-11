@@ -136,26 +136,6 @@
                         <p>该用户还没有发布任何帖子</p>
                     </div>
                 </div>
-
-                <!-- 我的收藏板块 -->
-                <div class="posts-section">
-                    <h2 class="posts-list-header">我的收藏</h2>
-                    <div v-if="favoritesLoading" class="loading">收藏加载中...</div>
-                    <div v-else-if="favoritePosts.length > 0" class="posts-list">
-                        <div v-for="post in favoritePosts" :key="post.id" class="post-card">
-                            <h3 class="post-title" @click="goToPost(post.id)">{{ post.content }}</h3>
-                            <div class="post-meta">
-                                <span><i class="fas fa-heart"></i> {{ post.likeCount || 0 }}</span>
-                                <span><i class="fas fa-comment"></i> {{ post.commentCount || 0 }}</span>
-                                <span><i class="fas fa-clock"></i> {{ formatTime(post.createTime) }}</span>
-                                <button class="btn btn-danger btn-xs" @click.stop="cancelFavorite(post.id)"><i class="fas fa-times"></i> 取消收藏</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else class="empty-state">
-                        <p>暂无收藏</p>
-                    </div>
-                </div>
             </div>
         </div>
     </main>
