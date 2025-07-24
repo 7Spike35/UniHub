@@ -15,6 +15,7 @@ createApp({
             },
             userId: null,
             isSubmitting: false,
+            showResetConfirm: false,
             MAX_IMAGES: 10,
             MAX_VIDEOS: 3,
             MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
@@ -64,16 +65,27 @@ createApp({
             return files.reduce((total, file) => total + file.size, 0);
         },
         
-        // 重置表单
+        // 重置表单：显示确认模态框
         resetForm() {
+            this.showResetConfirm = true;
+        },
+
+        // 确认重置
+        confirmReset() {
             this.content = '';
             this.imageFiles = [];
             this.videoFiles = [];
             this.imagePreviews = [];
             this.videoPreviews = [];
             this.message.show = false;
+            this.showResetConfirm = false; // 关闭模态框
         },
-        
+
+        // 取消重置
+        cancelReset() {
+            this.showResetConfirm = false; // 关闭模态框
+        },
+
         // 移除图片
         removeImage(index) {
             this.imageFiles.splice(index, 1);
