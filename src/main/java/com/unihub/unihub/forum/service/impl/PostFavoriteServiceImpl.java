@@ -16,6 +16,8 @@ import com.unihub.unihub.user.entity.User;
 import com.unihub.unihub.user.repository.UserRepository;
 import com.unihub.unihub.forum.entity.PostMedia;
 import com.unihub.unihub.forum.repository.PostMediaRepository;
+import com.unihub.unihub.forum.service.PostLikeService;
+import com.unihub.unihub.forum.service.CommentService;
 
 @Service
 public class PostFavoriteServiceImpl implements PostFavoriteService {
@@ -28,6 +30,12 @@ public class PostFavoriteServiceImpl implements PostFavoriteService {
     private UserRepository userRepository;
     @Autowired
     private PostMediaRepository postMediaRepository;
+
+    @Autowired
+    private PostLikeService postLikeService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Override
     @Transactional
@@ -81,6 +89,12 @@ public class PostFavoriteServiceImpl implements PostFavoriteService {
             if (post != null) {
                 User user = userRepository.findById(post.getUserId()).orElse(new User());
                 List<PostMedia> mediaList = postMediaRepository.findByPostId(post.getId());
+
+                int likeCount = postLikeService.getLikeCount(post.getId());
+                int favoriteCount = getFavoriteCount(post.getId());
+                int commentCount = commentService.getCommentCount(post.getId());
+                boolean isLiked = postLikeService.isLiked(post.getId(), userId);
+
                 PostDto dto = new PostDto(
                     post.getId(),
                     post.getUserId(),
@@ -88,7 +102,11 @@ public class PostFavoriteServiceImpl implements PostFavoriteService {
                     post.getContent(),
                     post.getCreateTime(),
                     mediaList,
-                    0, 0, 0, false, true // 收藏列表无需点赞等数据
+                    likeCount,
+                    favoriteCount,
+                    commentCount,
+                    isLiked,
+                    true // This is a list of favorites, so isFavorited is always true
                 );
                 result.add(dto);
             }
